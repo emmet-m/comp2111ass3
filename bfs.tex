@@ -20,5 +20,19 @@
 % Document starts here
 \begin{document}
 \maketitle
+\section*{Task 1}
+We will begin by defining some abstract queue operations in our toy language:
+
+\begin{align*}
+& proc initqueue(val q, val N) \refinedby \\
+    & \quad q : [True, q = <> ] \refinedby initqueue(q, N) \\
+& func size(val q) : \Z \refinedby \\
+    & \quad var n : \Z \\
+    & \quad n : [True, ] \refinedby n := size(q) \\
+& proc enqueue(q, z) \refinedby \\
+    & q : [n < N,  \refinedby enqueue \refinedby \\(q, x) \\
+\end{align*}
+
+\section*{Task 2}
 
 \end{document}
