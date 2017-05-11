@@ -11,7 +11,8 @@ typedef struct q {
 } * Queue;
 
 void initq(int size, Queue q);
-void initq(int size, Queue q);
-void initq(int size, Queue q);
+int sizeq(Queue q);
+Tree dequeue(Queue q);
+void enqueue(Tree t);
 
 #endif
