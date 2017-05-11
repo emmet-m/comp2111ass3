@@ -22,15 +22,22 @@
 \maketitle
 \section*{Task 1}
 We will begin by defining some abstract queue operations in our toy language:
-
 \begin{align*}
-& proc initqueue(val q, val N) \refinedby \\
-    & \quad q : [True, q = <> ] \refinedby initqueue(q, N) \\
-& func size(val q) : \Z \refinedby \\
-    & \quad var n : \Z \\
-    & \quad n : [True, ] \refinedby n := size(q) \\
-& proc enqueue(q, z) \refinedby \\
-    & q : [n < N,  \refinedby enqueue \refinedby \\(q, x) \\
+% Feel free to change the formatting I was just playing around
+& \textbf{proc }\text{\textsc{initqueue}(val q, val N) } \\ 
+    &\quad \refinedby  q : [True, q = <> ] \\
+    & \quad \refinedby \text{initqueue(q, N)} \\
+& \textbf{func }\text{\textsc{size}(val q) : }\Z \\
+    & \quad \refinedby \textbf{var }n : \Z \\
+    & \quad \quad ~ n : [True, POST] \\
+    & \quad \refinedby \text{n := size(q)} \\
+& \textbf{proc }\text{\textsc{enqueue}(q, z) }\\
+    & \quad \refinedby q : [n < N,  POST] \\
+    & \quad \refinedby \text{enqueue(q, x)} \\
+& \textbf{func }\text{\textsc{dequeue}(q) :} \text{ val}\\
+    & \quad \refinedby \textbf{var }t : \text{ val} \\
+    & \quad \quad ~ q, t : [PRE,  POST] \\
+    & \quad \refinedby \text{enqueue(q, x)} \\
 \end{align*}
 
 \section*{Task 2}
