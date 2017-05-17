@@ -8,8 +8,8 @@
 \usepackage{color}
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{2111defs,2111theorems}
-\title{Case study: Help us oh help}
-\author{Emmet Murray z5059840, Danni Ovens z5059491}
+\title{\texttt{$\mathbb{C}$ase $\mathbb{S}$tudy: $\mathbb{H}$elp us oh $\mathcal{HELP}$}}
+\author{$\mathbb{E}$mmet $\mathbb{M}$urray z5059840, $\mathbb{D}$anni $\mathbb{O}$vens z5059491}
 
 % Danni's awesome and super helpful math things y@y
 \newcommand{\N}{\mathbb{N}}
@@ -21,23 +21,54 @@
 \begin{document}
 \maketitle
 \section*{Task 1}
-We will begin by defining some abstract queue operations in our toy language:
+We will begin by defining some abstract queue operations in our toy language:\\
+%
+\begin{center}
+{\LARGE{\textsc{List:}}\normalsize}
+\end{center}
+\begin{align*}
+\mathcal{L} &:: \quad \langle ~ \rangle \\
+&~| \quad \langle v : \Z,~l : \mathcal{L} \rangle \\
+\end{align*}
+%
+Where $v$ is a value in the list. Now we can define our abstract queue by:\\
+\begin{center}
+{\LARGE{\textsc{Queue:}}\normalsize}
+\end{center}
+%
+\begin{align*}
+\mathcal{Q} &:: \quad \langle ~ \rangle \\
+&~| \quad \langle hd : \mathcal{L},~tl : \mathcal{L} \rangle \\
+\end{align*}
 \begin{align*}
 % Feel free to change the formatting I was just playing around
-& \textbf{proc }\text{\textsc{initqueue}(val q, val N) } \\ 
-    &\quad \refinedby  q : [True, q = <> ] \\
-    & \quad \refinedby \text{initqueue(q, N)} \\
-& \textbf{func }\text{\textsc{size}(val q) : }\Z \\
+% INITQ
+& \textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
+    &\quad \refinedby  q : [True, q = \langle \rangle ] \\
+    & \quad \refinedby q := \langle \rangle \\\\
+% SIZE
+& \textbf{func }\text{\textsc{size}(val q) : }\Z~ \cdot \\
     & \quad \refinedby \textbf{var }n : \Z \\
-    & \quad \quad ~ n : [True, POST] \\
-    & \quad \refinedby \text{n := size(q)} \\
-& \textbf{proc }\text{\textsc{enqueue}(q, z) }\\
-    & \quad \refinedby q : [n < N,  POST] \\
-    & \quad \refinedby \text{enqueue(q, x)} \\
-& \textbf{func }\text{\textsc{dequeue}(q) :} \text{ val}\\
+    & \quad \quad ~ n : [True, n = |q|] ; \\
+    & \quad \quad \textbf{ return } n\\
+    & \quad \refinedby \textbf{var }n : \Z \\
+    & \quad \quad  \text{ n := $|$q$|$;} \\
+    & \quad \quad \textbf{return } n \\\\
+% ENQ
+& \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
+    & \quad \refinedby q : \left[~|q|< N, ~q.tl_0.l = \big\langle v, \langle \rangle \big\rangle \land q.tl =  \big\langle v, \langle \rangle \big\rangle ~\right] \\
+    & \quad \refinedby \textbf{var } \text{elem : $\mathcal{L}$ } \cdot\\
+    & \quad \quad \text{ elem := }\langle~v,~\langle \rangle~\rangle ;\\
+    & \quad \quad \text{ q.tl.l := elem; q.tl :=  elem}\\\\
+% DEQ
+& \textbf{func }\text{\textsc{deq}(q) :} \text{ val } \cdot \\
     & \quad \refinedby \textbf{var }t : \text{ val} \\
-    & \quad \quad ~ q, t : [PRE,  POST] \\
-    & \quad \refinedby \text{dequeue(q, x)} \\
+    & \quad \quad ~q, t : \left[~|q| > 0,~q.l = q_0.l.l \land t = q_0.l.v~\right]; \\
+    & \quad \quad \textbf{ return }t \\
+    & \quad \refinedby \textbf{var }t : \text{ val} \\
+    & \quad  \quad \text{ t := q.l.v;} \\
+    & \quad  \quad \text{ q.l = q.l.l;} \\
+    & \quad \quad \textbf{ return }t \\
 \end{align*}
 
 \section*{Task 2}

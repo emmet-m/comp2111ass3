@@ -8,7 +8,7 @@ typedef struct q {
 	Tree * values;
 	int enqIndex;
 	int deqIndex;
-} * Queue;
+} * QueueRep;
 
 void initq(int size, Queue q);
 int sizeq(Queue q);
