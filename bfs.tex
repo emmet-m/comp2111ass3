@@ -68,7 +68,26 @@ Where $v$ is a value in the list. Now we can define our abstract queue by:\\
     & \quad \refinedby \textbf{var }t : \text{ val} \\
     & \quad  \quad \text{ t := q.l.v;} \\
     & \quad  \quad \text{ q.l = q.l.l;} \\
-    & \quad \quad \textbf{ return }t \\
+    & \quad \quad \textbf{ return }t \\\\
+    % if successor != null then pop successor else return value and this = null
+& \texttt{\Large{Second version of de	q (thanks to good m8).}} \\
+& \texttt{\Large{To do this we have to change the queue definition.}} \\
+& \textbf{func }\text{\textsc{deq}(q) :} \text{ val } \cdot \\
+    & \quad \refinedby \textbf{var }t : \text{ val} \\
+    & \quad \quad ~ \textbf{var } r : \mathcal{Q}  \\
+    & \quad \quad ~ \textbf{con }x, q'  \\
+    & \quad \quad ~t, r : [q = \langle x, q' \rangle, ~ t = x \land r = q]\\
+    & \quad \quad \textbf{ if } \Gamma_g(t) \neq \langle \rangle \textbf{ then} \\
+    & \quad \quad \quad \text{ pop(r)    \quad // remove the first element} \\
+    & \quad \quad \quad \text{ deq(r)    \quad  // recurse till we get to the end node} \\
+    & \quad \quad \textbf{ else} \\
+    %& \quad \quad \quad t := \Gamma^0_g(n) \\
+    & \quad \quad \quad \textbf{ return } t \\\\
+% POP
+& \textbf{proc }\text{\textsc{pop}(q) } \cdot \\
+	& \quad \refinedby \textbf{var }i : \text{ val ; } \\
+	& \quad \quad \textbf{ con}\text{ x, q'} \\
+	& \quad \quad~ q : [q = \langle x, q' \rangle, ~ q = q'] \\
 \end{align*}
 
 \section*{Task 2}
