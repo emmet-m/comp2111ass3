@@ -42,13 +42,13 @@ We will begin by defining some abstract queue operations in our toy language:\\
 & \textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
 	& \quad \textbf{var } b; \\
 	& \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
-	& \quad \text{ return b} \\\\
+	& \quad \text{ return b} \\
 		%
 	& \quad \refinedby \textbf{var } b; \\
 	& \quad \quad \textbf{ if } q = \langle \rangle \textbf{ then} \\
-	& \quad \quad \quad ~ b := True \\
+		& \quad \quad \quad ~ b := True \\
 	& \quad \quad \textbf{ else} \\
-	& \quad \quad \quad  ~ b := False \\
+		& \quad \quad \quad  ~ b := False \\
 	& \quad \quad\textbf{ fi} \\
 	& \quad \quad\text{ return b} \\\\
 % ENQ
@@ -64,9 +64,9 @@ We will begin by defining some abstract queue operations in our toy language:\\
 	%%%%%%%%%%%
     & \quad \refinedby \textbf{var }t : \text{ val} \\
     & \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
-	& \quad \quad \quad \text{t := q.v;} \\
+		& \quad \quad \quad \text{t := q.v;} \\
     & \quad \quad \textbf{ else} \\
-	& \quad \quad \quad \text{t := deq(q.next);} \\
+		& \quad \quad \quad \text{t := deq(q.next);} \\
     & \quad \quad \textbf{ fi} \\
     & \quad \quad \textbf{ return } t \\\\
 \end{align*}
