@@ -4,10 +4,11 @@
 \usepackage[all,error]{onlyamsmath}% Error on deprecated math commands like $$ $$.
 \usepackage{fixltx2e}
 \usepackage[strict=true]{csquotes}
-
 \usepackage{color}
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{2111defs,2111theorems}
+\allowdisplaybreaks
+
 \title{\texttt{$\mathbb{C}$ase $\mathbb{S}$tudy: $\mathbb{H}$elp us oh $\mathcal{HELP}$}}
 \author{$\mathbb{E}$mmet $\mathbb{M}$urray z5059840, $\mathbb{D}$anni $\mathbb{O}$vens z5059491}
 
@@ -36,35 +37,30 @@ We will begin by defining some abstract queue operations in our toy language:\\
 % INITQ
 & \textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
     &\quad \refinedby  q : [True, q = \langle \rangle ] \\
-    & \quad \refinedby q := \langle \rangle \\
-\end{align*}
-\begin{align*}
+    & \quad \refinedby q := \langle \rangle \\\\
+% ISEMPTY
 & \textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
 	& \quad \textbf{var } b; \\
 	& \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
-	& \quad \text{return b} \\
+	& \quad \text{ return b} \\\\
 		%
 	& \quad \refinedby \textbf{var } b; \\
-	& \quad \textbf{if } q = \langle \rangle \textbf{ then} \\
-	& \quad \quad b := True \\
-	& \quad \textbf{else} \\
-	& \quad \quad b := False \\
-	& \quad \textbf{fi} \\
-	& \quad \text{return b} \\
-\end{align*}
-\begin{align*}
+	& \quad \quad \textbf{ if } q = \langle \rangle \textbf{ then} \\
+	& \quad \quad \quad ~ b := True \\
+	& \quad \quad \textbf{ else} \\
+	& \quad \quad \quad  ~ b := False \\
+	& \quad \quad\textbf{ fi} \\
+	& \quad \quad\text{ return b} \\\\
 % ENQ
 & \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
 	& \quad q : \left[|q| < N, q = \langle v,~q_0 \rangle \right] \\
-    & \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\
-\end{align*}
-\begin{align*}
+    & \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\\\
 % Dis what I mean by dequeue
 & \textbf{func }\text{\textsc{deq}(q : $\mathcal{Q}$) :} \text{ val } \cdot \\
 	% post: there exists a Queue r in q_0 such that r's next is <> implies that t will be r's value and q is the same as q_0, but r is <>
     & \quad \quad \textbf{var }t : \text{ val} \\
-	& \quad \quad ~q : \left[ |q| > 0, \exists~r \in q_0. r.next = \langle \rangle \implies t = r.value \land q = q_0[^r/_{\langle \rangle}] \right] \\
-    & \quad \quad \textbf{ return } t \\
+	& \quad \quad ~q, t : \left[ |q| > 0, \exists r \in q_0.( r.next = \langle \rangle \implies t = r.value \land q = q_0[^{\langle \rangle}/_r]) \right] \\
+    & \quad \quad \textbf{ return } t \\\\
 	%%%%%%%%%%%
     & \quad \refinedby \textbf{var }t : \text{ val} \\
     & \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
