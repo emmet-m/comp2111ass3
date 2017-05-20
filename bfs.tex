@@ -24,91 +24,55 @@
 We will begin by defining some abstract queue operations in our toy language:\\
 %
 \begin{center}
-{\LARGE{\textsc{List:}}\normalsize}
-\end{center}
-\begin{align*}
-\mathcal{L} &:: \quad \langle ~ \rangle \\
-&~| \quad \langle v : \Z,~l : \mathcal{L} \rangle \\
-\end{align*}
-%
-Where $v$ is a value in the list. Now we can define our abstract queue by:\\
-\begin{center}
-{\LARGE{\textsc{Queue:}}\normalsize}
-\end{center}
-%
-\begin{align*}
-\mathcal{Q} &:: \quad \langle ~ \rangle \\
-&~| \quad \langle hd : \mathcal{L},~tl : \mathcal{L} \rangle \\
-\end{align*}
-\begin{align*}
-% Feel free to change the formatting I was just playing around
-% INITQ
-& \textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
-    &\quad \refinedby  q : [True, q = \langle \rangle ] \\
-    & \quad \refinedby q := \langle \rangle \\\\
-% SIZE
-& \textbf{func }\text{\textsc{size}(val q) : }\Z~ \cdot \\
-    & \quad \refinedby \textbf{var }n : \Z \\
-    & \quad \quad ~ n : [True, n = |q|] ; \\
-    & \quad \quad \textbf{ return } n\\
-    & \quad \refinedby \textbf{var }n : \Z \\
-    & \quad \quad  \text{ n := $|$q$|$;} \\
-    & \quad \quad \textbf{return } n \\\\
-% ENQ
-& \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
-    & \quad \refinedby q : \left[~|q|< N, ~q.tl_0.l = \big\langle v, \langle \rangle \big\rangle \land q.tl =  \big\langle v, \langle \rangle \big\rangle ~\right] \\
-    & \quad \refinedby \textbf{var } \text{elem : $\mathcal{L}$ } \cdot\\
-    & \quad \quad \text{ elem := }\langle~v,~\langle \rangle~\rangle ;\\
-    & \quad \quad \text{ q.tl.l := elem; q.tl :=  elem}\\\\
-% DEQ
-& \textbf{func }\text{\textsc{deq}(q) :} \text{ val } \cdot \\
-    & \quad \refinedby \textbf{var }t : \text{ val} \\
-    & \quad \quad ~q, t : \left[~|q| > 0,~q.l = q_0.l.l \land t = q_0.l.v~\right]; \\
-    & \quad \quad \textbf{ return }t \\
-    & \quad \refinedby \textbf{var }t : \text{ val} \\
-    & \quad  \quad \text{ t := q.l.v;} \\
-    & \quad  \quad \text{ q.l = q.l.l;} \\
-    & \quad \quad \textbf{ return }t \\\\
-    % if successor != null then pop successor else return value and this = null
-& \texttt{\Large{Second version of de	q (thanks to good m8).}} \\
-& \texttt{\Large{To do this we have to change the queue definition.}} \\
-%
-\end{align*}
-\begin{center}
 {\LARGE{\textsc{Queue:}}\normalsize}
 \end{center}
 \begin{align*}
 \mathcal{Q} &:: \quad \langle ~ \rangle \\
 &~| \quad \langle v : val,~\mathit{next} : \mathcal{Q} \rangle \\
 \end{align*}
+%
+\begin{align*}
+% Feel free to change the formatting I was just playing around
+% INITQ
+& \textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
+    &\quad \refinedby  q : [True, q = \langle \rangle ] \\
+    & \quad \refinedby q := \langle \rangle \\
+\end{align*}
+\begin{align*}
+& \textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
+	& \quad \textbf{var } b; \\
+	& \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
+	& \quad \text{return b} \\
+		%
+	& \quad \refinedby \textbf{var } b; \\
+	& \quad \textbf{if } q = \langle \rangle \textbf{ then} \\
+	& \quad \quad b := True \\
+	& \quad \textbf{else} \\
+	& \quad \quad b := False \\
+	& \quad \textbf{fi} \\
+	& \quad \text{return b} \\
+\end{align*}
+\begin{align*}
+% ENQ
+& \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
+	& \quad q : \left[|q| < N, q = \langle v,~q_0 \rangle \right] \\
+    & \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\
+\end{align*}
 \begin{align*}
 % Dis what I mean by dequeue
-& \textbf{func }\text{\textsc{deq}(q) :} \text{ val } \cdot \\
+& \textbf{func }\text{\textsc{deq}(q : $\mathcal{Q}$) :} \text{ val } \cdot \\
+	% post: there exists a Queue r in q_0 such that r's next is <> implies that t will be r's value and q is the same as q_0, but r is <>
+    & \quad \quad \textbf{var }t : \text{ val} \\
+	& \quad \quad ~q : \left[ |q| > 0, \exists~r \in q_0. r.next = \langle \rangle \implies t = r.value \land q = q_0[^r/_{\langle \rangle}] \right] \\
+    & \quad \quad \textbf{ return } t \\
+	%%%%%%%%%%%
     & \quad \refinedby \textbf{var }t : \text{ val} \\
-    & \quad \quad ~ \textbf{var } r : \mathcal{Q}  \\
     & \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
 	& \quad \quad \quad \text{t := q.v;} \\
     & \quad \quad \textbf{ else} \\
 	& \quad \quad \quad \text{t := deq(q.next);} \\
     & \quad \quad \textbf{ fi} \\
-    & \quad \quad \quad \textbf{ return } t \\\\
-%
-& \textbf{func }\text{\textsc{deq}(q) :} \text{ val } \cdot \\
-    & \quad \refinedby \textbf{var }t : \text{ val} \\
-    & \quad \quad ~ \textbf{var } r : \mathcal{Q}  \\
-    & \quad \quad ~ \textbf{con }x, q'  \\
-    & \quad \quad ~t, r : [q = \langle x, q' \rangle, ~ t = x \land r = q]\\
-    & \quad \quad \textbf{ if } \Gamma_g(t) \neq \langle \rangle \textbf{ then} \\
-    & \quad \quad \quad \text{ pop(r)    \quad // remove the first element} \\
-    & \quad \quad \quad \text{ deq(r)    \quad  // recurse till we get to the end node} \\
-    & \quad \quad \textbf{ else} \\
-    %& \quad \quad \quad t := \Gamma^0_g(n) \\
-    & \quad \quad \quad \textbf{ return } t \\\\
-% POP
-& \textbf{proc }\text{\textsc{pop}(q) } \cdot \\
-	& \quad \refinedby \textbf{var }i : \text{ val ; } \\
-	& \quad \quad \textbf{ con}\text{ x, q'} \\
-	& \quad \quad~ q : [q = \langle x, q' \rangle, ~ q = q'] \\
+    & \quad \quad \textbf{ return } t \\\\
 \end{align*}
 
 \section*{Task 2}
