@@ -72,6 +72,27 @@ Where $v$ is a value in the list. Now we can define our abstract queue by:\\
     % if successor != null then pop successor else return value and this = null
 & \texttt{\Large{Second version of de	q (thanks to good m8).}} \\
 & \texttt{\Large{To do this we have to change the queue definition.}} \\
+%
+\end{align*}
+\begin{center}
+{\LARGE{\textsc{Queue:}}\normalsize}
+\end{center}
+\begin{align*}
+\mathcal{Q} &:: \quad \langle ~ \rangle \\
+&~| \quad \langle v : val,~\mathit{next} : \mathcal{Q} \rangle \\
+\end{align*}
+\begin{align*}
+% Dis what I mean by dequeue
+& \textbf{func }\text{\textsc{deq}(q) :} \text{ val } \cdot \\
+    & \quad \refinedby \textbf{var }t : \text{ val} \\
+    & \quad \quad ~ \textbf{var } r : \mathcal{Q}  \\
+    & \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
+	& \quad \quad \quad \text{t := q.v;} \\
+    & \quad \quad \textbf{ else} \\
+	& \quad \quad \quad \text{t := deq(q.next);} \\
+    & \quad \quad \textbf{ fi} \\
+    & \quad \quad \quad \textbf{ return } t \\\\
+%
 & \textbf{func }\text{\textsc{deq}(q) :} \text{ val } \cdot \\
     & \quad \refinedby \textbf{var }t : \text{ val} \\
     & \quad \quad ~ \textbf{var } r : \mathcal{Q}  \\
