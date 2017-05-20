@@ -32,44 +32,44 @@ We will begin by defining some abstract queue operations in our toy language:\\
 &~| \quad \langle v : val,~\mathit{next} : \mathcal{Q} \rangle \\
 \end{align*}
 %
-\begin{align*}
+$
 % Feel free to change the formatting I was just playing around
 % INITQ
-& \textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
-    &\quad \refinedby  q : [True, q = \langle \rangle ] \\
-    & \quad \refinedby q := \langle \rangle \\\\
+ \textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
+	\quad \quad  q : [True, q = \langle \rangle ] \\
+	\quad \quad \refinedby q := \langle \rangle \\\\
 % ISEMPTY
-& \textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
-	& \quad \textbf{var } b; \\
-	& \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
-	& \quad \text{ return b} \\
+ \textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
+	 \quad \textbf{var } b; \\
+	 \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
+	 \quad \text{ return b} \\
 		%
-	& \quad \refinedby \textbf{var } b; \\
-	& \quad \quad \textbf{ if } q = \langle \rangle \textbf{ then} \\
-		& \quad \quad \quad ~ b := True \\
-	& \quad \quad \textbf{ else} \\
-		& \quad \quad \quad  ~ b := False \\
-	& \quad \quad\textbf{ fi} \\
-	& \quad \quad\text{ return b} \\\\
+	 \quad \refinedby \textbf{var } b; \\
+	 \quad \quad \textbf{ if } q = \langle \rangle \textbf{ then} \\
+		 \quad \quad \quad ~ b := True \\
+	 \quad \quad \textbf{ else} \\
+		 \quad \quad \quad  ~ b := False \\
+	 \quad \quad\textbf{ fi} \\
+	 \quad \quad\text{ return b} \\\\
 % ENQ
-& \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
-	& \quad q : \left[|q| < N, q = \langle v,~q_0 \rangle \right] \\
-    & \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\\\
+ \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
+	 \quad q : \left[|q| < N, q = \langle v,~q_0 \rangle \right] \\
+     \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\\\
 % Dis what I mean by dequeue
-& \textbf{func }\text{\textsc{deq}(q : $\mathcal{Q}$) :} \text{ val } \cdot \\
+ \textbf{func }\text{\textsc{deq}(q : $\mathcal{Q}$) :} \text{ val } \cdot \\
 	% post: there exists a Queue r in q_0 such that r's next is <> implies that t will be r's value and q is the same as q_0, but r is <>
-    & \quad \quad \textbf{var }t : \text{ val} \\
-	& \quad \quad ~q, t : \left[ |q| > 0, \exists r \in q_0.( r.next = \langle \rangle \implies t = r.value \land q = q_0[^{\langle \rangle}/_r]) \right] \\
-    & \quad \quad \textbf{ return } t \\\\
+     \quad \quad \textbf{var }t : \text{ val} \\
+	 \quad \quad ~q, t : \left[ |q| > 0, \exists r \in q_0.( r.next = \langle \rangle \implies t = r.value \land q = q_0[^{\langle \rangle}/_r]) \right] \\
+     \quad \quad \textbf{ return } t \\\\
 	%%%%%%%%%%%
-    & \quad \refinedby \textbf{var }t : \text{ val} \\
-    & \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
-		& \quad \quad \quad \text{t := q.v;} \\
-    & \quad \quad \textbf{ else} \\
-		& \quad \quad \quad \text{t := deq(q.next);} \\
-    & \quad \quad \textbf{ fi} \\
-    & \quad \quad \textbf{ return } t \\\\
-\end{align*}
+     \quad \refinedby \textbf{var }t : \text{ val} \\
+     \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
+		 \quad \quad \quad \text{t := q.v;} \\
+     \quad \quad \textbf{ else} \\
+		 \quad \quad \quad \text{t := deq(q.next);} \\
+     \quad \quad \textbf{ fi} \\
+     \quad \quad \textbf{ return } t \\\\
+$
 
 \section*{Task 2}
 
