@@ -6,7 +6,7 @@
 \usepackage[strict=true]{csquotes}
 \usepackage[usenames, dvipsnames]{color}
 \usepackage[colorlinks=true]{hyperref}
-\usepackage{2111defs,2111theorems}
+\usepackage{2111defs2,2111theorems}
 
 % Algortihms package for pretty code formatting!
 \usepackage{algorithm2e}
@@ -25,30 +25,22 @@
 %This is actually the best thing we've probably ever done
 \newcommand{\rc}[1]{ $\refinedby$ \quad \textbf{\textcolor{ForestGreen}{$\langle$ #1 $\rangle$}}}
 
+%I cna't live without this:
+\newcommand{\squigglyBoy}{~}
+\newcommand{\leftcurlyBoy}{\{}
+\newcommand{\rightcurlyBoy}{\}}
+
+% This is just fun:
+\newcommand{\que}[1]{\langle #1 \rangle}
+\newcommand{\explain}[1]{\textcolor{RoyalBlue}{\textit{#1}}}
+
 % Document starts here
 \begin{document}
 \maketitle
 \section{BFS Implementation}
 %
 \subsection{Defining an abstract queue}
-We will begin by defining some abstract queue operations in our toy language:\\
-%
-% ALGORITHM README
-%
-%\begin{algorithm}[H]
-% Condition inside first brackets
-%\eIf {$$} {
-% If part follows
-%$
-%$
-%}{
-% Else part
-%$
-%$
-%}
-%\end{algorithm}
-%
-%
+We will begin by defining some abstract queue operations in our toy language: \\
 \begin{center}
 {\LARGE{\textsc{Queue:}}\normalsize}
 \end{center}
@@ -56,6 +48,7 @@ We will begin by defining some abstract queue operations in our toy language:\\
 \mathcal{Q} &:: \quad \langle ~ \rangle \\
 &~| \quad \langle v : val,~\mathit{next} : \mathcal{Q} \rangle \\
 \end{align*}
+Note: q.n refers to the length of the queue, as defined in the specification task 1.
 %
 % Feel free to change the formatting I was just playing around
 % INITQ
@@ -86,13 +79,13 @@ $
 % ENQ
 $
  \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
-	 \quad q : \left[|q| < N, q = \langle v,~q_0 \rangle \right] \\
+	 \quad q : \left[q.n < N, q = \langle v,~q_0 \rangle \right] \\
      \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\\\
 % Dis what I mean by dequeue
  \textbf{func }\text{\textsc{deq}(q : $\mathcal{Q}$) :} \text{ val } \cdot \\
 	% post: there exists a Queue r in q_0 such that r's next is <> implies that t will be r's value and q is the same as q_0, but r is <>
      \quad \quad \textbf{var }t : \text{ val} \\
-	 \quad \quad ~q, t : \left[ |q| > 0, \exists r \in q_0.( r.next = \langle \rangle \implies t = r.value \land q = q_0[^{\langle \rangle}/_r]) \right] \\
+	 \quad \quad ~q, t : \left[ q.n > 0, \exists r \in q_0.( r.next = \langle \rangle \implies t = r.value \land q = q_0[^{\langle \rangle}/_r]) \right] \\
      \quad \quad \textbf{ return } t \\\\
 	%%%%%%%%%%%
      \quad \refinedby \textbf{var }t : \text{ val} \\
@@ -118,13 +111,71 @@ We begin by refining the provided specification of \textsc{Search}: \\
 %
 %
 \rc{c-frame} \\ \\
-$v, f: \left[
+$\nt{v, f: \left[
     \begin{array}{l} 
 	\textsc{Tree}(t) \land \text{max}_{i\in\N} | \Gamma^i_t (r_t)  \cup \Gamma^{i+1}_t (r_t) | \leq N ,\\
-	(f \land \exists w \in V_{t_0} (\kappa_{t_0}(w) = k_0 \land \lambda_{t_0} (w) = v)) ~ \lor \\
-	(\neg f  \land \forall w \in V_{t_0} (\kappa_{t_0}(w) \neq k_0))
+	(f \land \exists w \in V_{t} (\kappa_{t}(w) = k \land \lambda_{t} (w) = v)) ~ \lor \\
+	(\neg f  \land \forall w \in V_{t} (\kappa_{t}(w) \neq k))
     \end{array} 
+\right]}{(1)}$ \\ \\
+%
+We neeeeeeed a queue to do operations with, so we create a queue variable and initialise it: \\
+\rc{i-loc} \explain{q doesn't occur yet} \\
+\textbf{var } q : $\mathcal{Q}~\cdot$ 
+$v, f, q \left[ 
+~pre(1),~
+post(1)~
+\right]$ \\ \\
+%
+%
+%
+\rc{seq} \explain{so we can refine to our procedure call}\\
+$v, f, q : \left[ 
+	\squigglyBoy True, \squigglyBoy
+	pre(1) \land q = \que{}
+\right]$; \\
+$v, f, q : \left[ 	
+	pre(1) \land q = \que{}, \squigglyBoy
+	post(1)
+\right]$ \\ \\
+%
+%
+%
+\rc{proc} \\
+\textsc{initq}(q,N); \\
+$\nt{v, f, q : \left[ 	
+	pre(1) \land q = \que{}, \squigglyBoy
+	post(1)
+\right]}{(2)}$ \\
+
+\noindent
+Now that we have our queue initialised we must add our root node, $t$. to begin searching: \\
+(2) \rc{seq} \\
+$v, f, q : \left[ 	
+	pre(1) \land q = \que{}, \squigglyBoy
+	post(1)
+\right]$; \\
+$v, f, q : \left[ 	
+	pre(1) \land q = \que{}, \squigglyBoy
+	post(1)
 \right]$
-%
-%
 \end{document}
+
+
+
+ ALGORITHM README
+
+\begin{algorithm}[H]
+ %Condition inside first brackets
+\eIf {$$} {
+ If part follows
+$
+$
+}{
+ Else part
+$
+$
+}
+\end{algorithm}
+
+
