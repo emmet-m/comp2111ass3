@@ -4,9 +4,14 @@
 \usepackage[all,error]{onlyamsmath}% Error on deprecated math commands like $$ $$.
 \usepackage{fixltx2e}
 \usepackage[strict=true]{csquotes}
-\usepackage{color}
+\usepackage[usenames, dvipsnames]{color}
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{2111defs,2111theorems}
+
+% Algortihms package for pretty code formatting!
+\usepackage{algorithm2e}
+\usepackage{algpseudocode}
+
 \allowdisplaybreaks
 
 \title{\texttt{$\mathbb{C}$ase $\mathbb{S}$tudy: $\mathbb{H}$elp us oh $\mathcal{HELP}$}}
@@ -17,12 +22,32 @@
 \newcommand{\Z}{\mathbb{Z}}
 \newcommand{\refinedby}{\sqsubseteq} % THIS IS MY PERSONAL FAV ~refined by~
 \newcommand\textlcsc[1]{\textsc{\MakeLowercase{#1}}} % pretty small uppercase letters
+%This is actually the best thing we've probably ever done
+\newcommand{\rc}[1]{ $\refinedby$ \quad \textbf{\textcolor{ForestGreen}{$\langle$ #1 $\rangle$}}}
 
 % Document starts here
 \begin{document}
 \maketitle
-\section*{Task 1}
+\section{BFS Implementation}
+%
+\subsection{Defining an abstract queue}
 We will begin by defining some abstract queue operations in our toy language:\\
+%
+% ALGORITHM README
+%
+%\begin{algorithm}[H]
+% Condition inside first brackets
+%\eIf {$$} {
+% If part follows
+%$
+%$
+%}{
+% Else part
+%$
+%$
+%}
+%\end{algorithm}
+%
 %
 \begin{center}
 {\LARGE{\textsc{Queue:}}\normalsize}
@@ -32,26 +57,34 @@ We will begin by defining some abstract queue operations in our toy language:\\
 &~| \quad \langle v : val,~\mathit{next} : \mathcal{Q} \rangle \\
 \end{align*}
 %
-$
 % Feel free to change the formatting I was just playing around
 % INITQ
- \textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
+ $\textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
 	\quad \quad  q : [True, q = \langle \rangle ] \\
 	\quad \quad \refinedby q := \langle \rangle \\\\
+ $
 % ISEMPTY
- \textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
+ $\textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
 	 \quad \textbf{var } b; \\
 	 \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
 	 \quad \text{ return b} \\
-		%
-	 \quad \refinedby \textbf{var } b; \\
-	 \quad \quad \textbf{ if } q = \langle \rangle \textbf{ then} \\
-		 \quad \quad \quad ~ b := True \\
-	 \quad \quad \textbf{ else} \\
-		 \quad \quad \quad  ~ b := False \\
-	 \quad \quad\textbf{ fi} \\
-	 \quad \quad\text{ return b} \\\\
+ $
+%
+%
+$\refinedby$  \textbf{   var } b; \\
+\begin{algorithm}[H]
+\eIf {$q = \langle \rangle$} {
+$
+b := True 
+$
+}{
+$
+b := False
+$
+} 
+\end{algorithm} 
 % ENQ
+$
  \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
 	 \quad q : \left[|q| < N, q = \langle v,~q_0 \rangle \right] \\
      \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\\\
@@ -70,8 +103,10 @@ $
      \quad \quad \textbf{ fi} \\
      \quad \quad \textbf{ return } t \\\\
 $
-
-\section*{Task 2}
+%
+\subsection{Refinement}
+We begin by refining the provided specification of \textsc{Search}: \\
+%
 \textbf{proc }{\textsc{Search}(\textbf{value} $t$, \textbf{value} $N$, \textbf{value} $k$, \textbf{result} $v$, \textbf{result} $f$) $\cdot$\\
 \[ t, N, k, v, f: \left[
     \begin{array}{l} 
@@ -80,19 +115,16 @@ $
 	(\neg f  \land \forall w \in V_{t_0} (\kappa_{t_0}(w) \neq k_0))
     \end{array} 
 \right] \]
+%
+%
+\rc{c-frame} \\ \\
+$v, f: \left[
+    \begin{array}{l} 
+	\textsc{Tree}(t) \land \text{max}_{i\in\N} | \Gamma^i_t (r_t)  \cup \Gamma^{i+1}_t (r_t) | \leq N ,\\
+	(f \land \exists w \in V_{t_0} (\kappa_{t_0}(w) = k_0 \land \lambda_{t_0} (w) = v)) ~ \lor \\
+	(\neg f  \land \forall w \in V_{t_0} (\kappa_{t_0}(w) \neq k_0))
+    \end{array} 
+\right]$
+%
+%
 \end{document}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
