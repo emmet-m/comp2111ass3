@@ -53,7 +53,7 @@ Note: q.n refers to the length of the queue, as defined in the specification tas
 % Feel free to change the formatting I was just playing around
 % INITQ
  $\textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
-	\quad \quad  q : [True, q = \langle \rangle ] \\
+	\quad \quad  q : [True, q = \que{} \land q.n = 0  ] \\
 	\quad \quad \refinedby q := \langle \rangle \\\\
  $
 % ISEMPTY
@@ -132,10 +132,10 @@ post(1)~
 \rc{seq} \explain{so we can refine to our procedure call}\\
 $v, f, q : \left[ 
 	\squigglyBoy True, \squigglyBoy
-	pre(1) \land q = \que{}
+	pre(1) \land q = \que{} \land q.n = 0
 \right]$; \\
 $v, f, q : \left[ 	
-	pre(1) \land q = \que{}, \squigglyBoy
+	pre(1) \land q = \que{} \land q.n = 0, \squigglyBoy
 	post(1)
 \right]$ \\ \\
 %
@@ -144,22 +144,59 @@ $v, f, q : \left[
 \rc{proc} \\
 \textsc{initq}(q,N); \\
 $\nt{v, f, q : \left[ 	
-	pre(1) \land q = \que{}, \squigglyBoy
+	pre(1) \land q = \que{} \land q.n = 0, \squigglyBoy
 	post(1)
 \right]}{(2)}$ \\
 
 \noindent
 Now that we have our queue initialised we must add our root node, $t$. to begin searching: \\
-(2) \rc{seq} \\
+(2) \rc{seq, i-con} \explain{We introduce a constant c that freezes our queue's initial state} \\
+\textbf{con } c $\cdot$ 
 $v, f, q : \left[ 	
-	pre(1) \land q = \que{}, \squigglyBoy
-	post(1)
+\begin{array}{l}
+	pre(1) \land q = \que{} \land q.n = 0 \land q = c, \squigglyBoy \\
+	q = \que{t, c} \land pre(1)
+\end{array}
 \right]$; \\
-$v, f, q : \left[ 	
-	pre(1) \land q = \que{}, \squigglyBoy
+% Do't break up the \squigglyBoy fam please.
+$~~~~~~~~~~~~~v, f, q : \left[ 	
+	q = \que{t, c} \land pre(1), \squigglyBoy
 	post(1)
-\right]$
+\right]$ \\
+
+\noindent
+\rc{proc, s-post} \explain{As our pre and post conditions are subsets of \textsc{enq}'s, we refine to the procedure. As we previously set $c = \que{}$, we can replace c with the empty queue. We can now get rid of c.} \\
+%
+%
+\textsc{enq}(q, t); \\
+% Do't break up the \squigglyBoy fam please.
+$ \nt{v, f, q : \left[ 	
+	q = \que{t, \que{}} \land pre(1), \squigglyBoy
+	post(1)
+\right]}{(3)}$
+
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -12,7 +12,7 @@ void search (Tree root, unsigned int N, Key key, T *val, RetVal *found) {
 	Queue q;
 	initq(N, q);
     enqueue(root);
-	while (sizeq(q) != 0) {
+	while (! isEmpty(q)) {
 		Tree n = dequeue(q);
 		if (cmpKey(key, n->id)) {
 			*val = n->val;
