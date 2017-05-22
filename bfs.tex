@@ -53,18 +53,18 @@ Note: q.n refers to the length of the queue, as defined in the specification tas
 % Feel free to change the formatting I was just playing around
 % INITQ
  $\textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
-	\quad \quad  q : [True, q = \que{} \land q.n = 0  ] \\
-	\quad \quad \refinedby q := \langle \rangle \\\\
+	\null \quad \quad  ~ q : [True, q = \que{} \land q.n = 0  ] \\
+	\null \quad \quad \refinedby q := \langle \rangle \\\\
  $
 % ISEMPTY
  $\textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
-	 \quad \textbf{var } b; \\
-	 \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
-	 \quad \text{ return b} \\
+	\null \quad \textbf{var } b; \\
+	\null \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
+	\null \quad \text{ return b} \\
  $
 %
 %
-$\refinedby$  \textbf{   var } b; \\
+$\refinedby$  \textbf{ var } b; \\
 \begin{algorithm}[H]
 \eIf {$q = \langle \rangle$} {
 $
@@ -79,26 +79,26 @@ $
 % ENQ
 $
  \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
-	 \quad q : \left[q.n < N, q = \langle v,~q_0 \rangle \right] \\
-     \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\\\
+	 \null \quad ~q : \left[q.n < N, q = \langle v,~q_0 \rangle \right] \\
+     \null \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\\\
 % Dis what I mean by dequeue
  \textbf{func }\text{\textsc{deq}(q : $\mathcal{Q}$) :} \text{ val } \cdot \\
 	% post: there exists a Queue r in q_0 such that r's next is <> implies that t will be r's value and q is the same as q_0, but r is <>
-     \quad \quad \textbf{var }t : \text{ val} \\
-	 \quad \quad ~q, t : \left[ q.n > 0, \exists r \in q_0.( r.next = \langle \rangle \implies t = r.value \land q = q_0[^{\langle \rangle}/_r]) \right] \\
-     \quad \quad \textbf{ return } t \\\\
+     \null \quad \quad \textbf{var }t : \text{ val} \\
+	 \null \quad \quad q, t : \left[ q.n > 0, \exists r \in q_0.( r.next = \langle \rangle \implies t = r.value \land q = q_0[^{\langle \rangle}/_r]) \right] \\
+     \null \quad \quad \textbf{return } t \\\\
 	%%%%%%%%%%%
-     \quad \refinedby \textbf{var }t : \text{ val} \\
-     \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
-		 \quad \quad \quad \text{t := q.v;} \\
-     \quad \quad \textbf{ else} \\
-		 \quad \quad \quad \text{t := deq(q.next);} \\
-     \quad \quad \textbf{ fi} \\
-     \quad \quad \textbf{ return } t \\\\
+     \null \quad \refinedby \textbf{var }t : \text{ val} \\
+     \null \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
+		 \null \quad \quad \quad \text{t := q.v;} \\
+     \null \quad \quad \textbf{ else} \\
+		 \null \quad \quad \quad \text{t := deq(q.next);} \\
+     \null \quad \quad \textbf{ fi} \\
+     \null \quad \quad \textbf{ return } t \\\\
 $
 %
 \subsection{Refinement}
-We begin by refining the provided specification of \textsc{Search}: \\
+We begin by refining the provided specification of \textsc{Search}: \\ \\
 %
 \textbf{proc }{\textsc{Search}(\textbf{value} $t$, \textbf{value} $N$, \textbf{value} $k$, \textbf{result} $v$, \textbf{result} $f$) $\cdot$\\
 \[ t, N, k, v, f: \left[
@@ -107,11 +107,11 @@ We begin by refining the provided specification of \textsc{Search}: \\
 	(f \land \exists w \in V_{t_0} (\kappa_{t_0}(w) = k_0 \land \lambda_{t_0} (w) = v)) ~ \lor \\
 	(\neg f  \land \forall w \in V_{t_0} (\kappa_{t_0}(w) \neq k_0))
     \end{array} 
-\right] \]
+\right] \] \\
 %
 %
-\rc{c-frame} \\ \\
-$\nt{v, f: \left[
+\rc{c-frame} \\ 
+$\null \quad \nt{v, f: \left[
     \begin{array}{l} 
 	\textsc{Tree}(t) \land \text{max}_{i\in\N} | \Gamma^i_t (r_t)  \cup \Gamma^{i+1}_t (r_t) | \leq N ,\\
 	(f \land \exists w \in V_{t} (\kappa_{t}(w) = k \land \lambda_{t} (w) = v)) ~ \lor \\
@@ -119,58 +119,60 @@ $\nt{v, f: \left[
     \end{array} 
 \right]}{(1)}$ \\ \\
 %
-We neeeeeeed a queue to do operations with, so we create a queue variable and initialise it: \\
+\\ In order to use a breadth first search along the tree, we need a queue. Thus we must create a queue variable and initialise it to an empty queue: \\  \\
+%I LOC
 \rc{i-loc} \explain{q doesn't occur yet} \\
-\textbf{var } q : $\mathcal{Q}~\cdot$ 
+\null \quad \textbf{var } q : $\mathcal{Q}~\cdot$ 
 $v, f, q \left[ 
 ~pre(1),~
 post(1)~
 \right]$ \\ \\
 %
 %
-%
+% SEQ
 \rc{seq} \explain{so we can refine to our procedure call}\\
-$v, f, q : \left[ 
-	\squigglyBoy True, \squigglyBoy
+$ \null \quad v, f, q : \left[ 
+	~ True, ~
 	pre(1) \land q = \que{} \land q.n = 0
 \right]$; \\
-$v, f, q : \left[ 	
-	pre(1) \land q = \que{} \land q.n = 0, \squigglyBoy
+$ \null \quad v, f, q : \left[ 	
+	pre(1) \land q = \que{} \land q.n = 0, ~
 	post(1)
 \right]$ \\ \\
 %
 %
-%
+% PROC
 \rc{proc} \\
-\textsc{initq}(q,N); \\
-$\nt{v, f, q : \left[ 	
-	pre(1) \land q = \que{} \land q.n = 0, \squigglyBoy
+\null \quad \textsc{initq}(q,N); \\
+$\null \quad \nt{v, f, q : \left[ 	
+	pre(1) \land q = \que{} \land q.n = 0, ~
 	post(1)
-\right]}{(2)}$ \\
-
-\noindent
-Now that we have our queue initialised we must add our root node, $t$. to begin searching: \\
-(2) \rc{seq, i-con} \explain{We introduce a constant c that freezes our queue's initial state} \\
-\textbf{con } c $\cdot$ 
+\right]}{(2)}$ \\ \\
+%
+%
+Now that we have our queue initialised we must add our root node, $t$. to begin searching: \\ \\
+\textcolor{red}{(2)} \rc{seq, i-con} \explain{We introduce a constant c, freezing our queue's initial state.} \\
+\null \quad \textbf{con } c $\cdot$ 
 $v, f, q : \left[ 	
 \begin{array}{l}
-	pre(1) \land q = \que{} \land q.n = 0 \land q = c, \squigglyBoy \\
+	pre(1) \land q = \que{} \land q.n = 0 \land q = c, ~ \\
 	q = \que{t, c} \land pre(1)
 \end{array}
 \right]$; \\
 % Do't break up the \squigglyBoy fam please.
-$~~~~~~~~~~~~~v, f, q : \left[ 	
-	q = \que{t, c} \land pre(1), \squigglyBoy
+\null \quad $~~~~~~~~~~~~v, f, q : \left[ 	
+	q = \que{t, c} \land pre(1), ~
 	post(1)
-\right]$ \\
-
-\noindent
+\right]$ \\ \\
+%
+%
+% PROC, SPOST
 \rc{proc, s-post} \explain{As our pre and post conditions are subsets of \textsc{enq}'s, we refine to the procedure. As we previously set $c = \que{}$, we can replace c with the empty queue. We can now get rid of c.} \\
 %
 %
-\textsc{enq}(q, t); \\
+\null \quad \textsc{enq}(q, t); \\
 % Do't break up the \squigglyBoy fam please.
-$ \nt{v, f, q : \left[ 	
+\null \quad $ \nt{v, f, q : \left[ 	
 	q = \que{t, \que{}} \land pre(1), \squigglyBoy
 	post(1)
 \right]}{(3)}$
