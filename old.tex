@@ -1,0 +1,220 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage[l2tabu,orthodox]{nag}% Old habits die hard. All the same, there are commands, classes and packages which are outdated and superseded. nag provides routines to warn the user about the use of those.
+
+\usepackage[all,error]{onlyamsmath}% Error on deprecated math commands like $$ $$.
+\usepackage{fixltx2e}
+\usepackage[strict=true]{csquotes}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{2111defs2,2111theorems}
+
+% Algortihms package for pretty code formatting!
+\usepackage{algorithm2e}
+\usepackage{algpseudocode}
+
+\allowdisplaybreaks
+
+\title{\texttt{$\mathbb{C}$ase $\mathbb{S}$tudy: $\mathbb{H}$elp us oh $\mathcal{HELP}$}}
+\author{$\mathbb{E}$mmet $\mathbb{M}$urray z5059840, $\mathbb{D}$anni $\mathbb{O}$vens z5059491}
+
+% Danni's awesome and super helpful math things y@y
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\refinedby}{\sqsubseteq} % THIS IS MY PERSONAL FAV ~refined by~
+\newcommand\textlcsc[1]{\textsc{\MakeLowercase{#1}}} % pretty small uppercase letters
+%This is actually the best thing we've probably ever done
+\newcommand{\rc}[1]{ $\refinedby$ \quad \textbf{\textcolor{ForestGreen}{$\langle$ #1 $\rangle$}}}
+
+%I cna't live without this:
+\newcommand{\squigglyBoy}{~}
+\newcommand{\leftcurlyBoy}{\{}
+\newcommand{\rightcurlyBoy}{\}}
+
+% This is just fun:
+\newcommand{\que}[1]{\langle #1 \rangle}
+\newcommand{\explain}[1]{\textcolor{RoyalBlue}{\textit{#1}}}
+
+% Document starts here
+\begin{document}
+\maketitle
+\section{BFS Implementation}
+%
+\subsection{Defining an abstract queue}
+We will begin by defining some abstract queue operations in our toy language: \\
+\begin{center}
+{\LARGE{\textsc{Queue:}}\normalsize}
+\end{center}
+\begin{align*}
+\mathcal{Q} &:: \quad \langle ~ \rangle \\
+&~| \quad \langle v : val,~\mathit{next} : \mathcal{Q} \rangle \\
+\end{align*}
+Note: q.n refers to the length of the queue, as defined in the specification task 1.
+%
+% Feel free to change the formatting I was just playing around
+% INITQ
+ $\textbf{proc }\text{\textsc{initq}(q, val N) } \cdot \\ 
+	\null \quad \quad  ~ q : [True, q = \que{} \land q.n = 0  ] \\
+	\null \quad \quad \refinedby q := \langle \rangle \\\\
+ $
+% ISEMPTY
+ $\textbf{func }\text{\textsc{isEmpty}(q) } : \text{boolean} \cdot  \\ 
+	\null \quad \textbf{var } b; \\
+	\null \quad ~ q : [True,~b \iff q = \langle \rangle  ] \\
+	\null \quad \text{ return b} \\
+ $
+%
+%
+$\refinedby$  \textbf{ var } b; \\
+\begin{algorithm}[H]
+\eIf {$q = \langle \rangle$} {
+$
+b := True 
+$
+}{
+$
+b := False
+$
+} 
+\end{algorithm} 
+% ENQ
+$
+ \textbf{proc }\text{\textsc{enq}(q, val v) } \cdot\\
+	 \null \quad ~q : \left[q.n < N, q = \langle v,~q_0 \rangle \right] \\
+     \null \quad \refinedby \text{ q := $\langle$ v, q $\rangle$}\\\\
+% Dis what I mean by dequeue
+ \textbf{func }\text{\textsc{deq}(q : $\mathcal{Q}$) :} \text{ val } \cdot \\
+	% post: there exists a Queue r in q_0 such that r's next is <> implies that t will be r's value and q is the same as q_0, but r is <>
+     \null \quad \quad \textbf{var }t : \text{ val} \\
+	 \null \quad \quad q, t : \left[ q.n > 0, \exists r \in q_0.( r.next = \langle \rangle \implies t = r.value \land q = q_0[^{\langle \rangle}/_r]) \right] \\
+     \null \quad \quad \textbf{return } t \\\\
+	%%%%%%%%%%%
+     \null \quad \refinedby \textbf{var }t : \text{ val} \\
+     \null \quad \quad \textbf{ if } q.next = \langle \rangle \textbf{ then} \\
+		 \null \quad \quad \quad \text{t := q.v;} \\
+     \null \quad \quad \textbf{ else} \\
+		 \null \quad \quad \quad \text{t := deq(q.next);} \\
+     \null \quad \quad \textbf{ fi} \\
+     \null \quad \quad \textbf{ return } t \\\\
+$
+%
+\subsection{Refinement}
+We begin by refining the provided specification of \textsc{Search}: \\ \\
+%
+\textbf{proc }{\textsc{Search}(\textbf{value} $t$, \textbf{value} $N$, \textbf{value} $k$, \textbf{result} $v$, \textbf{result} $f$) $\cdot$\\
+\[ t, N, k, v, f: \left[
+    \begin{array}{l} 
+	\textsc{Tree}(t) \land \text{max}_{i\in\N} | \Gamma^i_t (r_t)  \cup \Gamma^{i+1}_t (r_t) | \leq N ,\\
+	(f \land \exists w \in V_{t_0} (\kappa_{t_0}(w) = k_0 \land \lambda_{t_0} (w) = v)) ~ \lor \\
+	(\neg f  \land \forall w \in V_{t_0} (\kappa_{t_0}(w) \neq k_0))
+    \end{array} 
+\right] \] \\
+%
+%
+\rc{c-frame} \\ 
+$\null \quad \nt{v, f: \left[
+    \begin{array}{l} 
+	\textsc{Tree}(t) \land \text{max}_{i\in\N} | \Gamma^i_t (r_t)  \cup \Gamma^{i+1}_t (r_t) | \leq N ,\\
+	(f \land \exists w \in V_{t} (\kappa_{t}(w) = k \land \lambda_{t} (w) = v)) ~ \lor \\
+	(\neg f  \land \forall w \in V_{t} (\kappa_{t}(w) \neq k))
+    \end{array} 
+\right]}{(1)}$ \\ \\
+%
+\\ In order to use a breadth first search along the tree, we need a queue. Thus we must create a queue variable and initialise it to an empty queue: \\  \\
+%I LOC
+\rc{i-loc} \explain{q doesn't occur yet} \\
+\null \quad \textbf{var } q : $\mathcal{Q}~\cdot$ 
+$v, f, q \left[ 
+~pre(1),~
+post(1)~
+\right]$ \\ \\
+%
+%
+% SEQ
+\rc{seq} \explain{so we can refine to our procedure call}\\
+$ \null \quad v, f, q : \left[ 
+	~ True, ~
+	pre(1) \land q = \que{} \land q.n = 0
+\right]$; \\
+$ \null \quad v, f, q : \left[ 	
+	pre(1) \land q = \que{} \land q.n = 0, ~
+	post(1)
+\right]$ \\ \\
+%
+%
+% PROC
+\rc{proc} \\
+\null \quad \textsc{initq}(q,N); \\
+$\null \quad \nt{v, f, q : \left[ 	
+	pre(1) \land q = \que{} \land q.n = 0, ~
+	post(1)
+\right]}{(2)}$ \\ \\
+%
+%
+Now that we have our queue initialised we must add our root node, $t$. to begin searching: \\ \\
+\textcolor{red}{(2)} \rc{seq, i-con} \explain{We introduce a constant c, freezing our queue's initial state.} \\
+\null \quad \textbf{con } c $\cdot$ 
+$v, f, q : \left[ 	
+\begin{array}{l}
+	pre(1) \land q = \que{} \land q.n = 0 \land q = c, ~ \\
+	q = \que{t, c} \land pre(1)
+\end{array}
+\right]$; \\
+% Do't break up the \squigglyBoy fam please.
+\null \quad $~~~~~~~~~~~~v, f, q : \left[ 	
+	q = \que{t, c} \land pre(1), ~
+	post(1)
+\right]$ \\ \\
+%
+%
+% PROC, SPOST
+\rc{proc, s-post} \explain{As our pre and post conditions are subsets of \textsc{enq}'s, we refine to the procedure. As we previously set $c = \que{}$, we can replace c with the empty queue. We can now get rid of c.} \\
+%
+%
+\null \quad \textsc{enq}(q, t); \\
+% Do't break up the \squigglyBoy fam please.
+\null \quad $ \nt{v, f, q : \left[ 	
+	q = \que{t, \que{}} \land pre(1), \squigglyBoy
+	post(1)
+\right]}{(3)}$
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ALGORITHM README
+
+\begin{algorithm}[H]
+ %Condition inside first brackets
+\eIf {$$} {
+ If part follows
+$
+$
+}{
+ Else part
+$
+$
+}
+\end{algorithm}
+
+
