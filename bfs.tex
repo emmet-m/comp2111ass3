@@ -54,15 +54,133 @@ We can now define our 4 core abstract queue operations: \\ \\
 %
 \textbf{Initq:} \\
 % Do we even need this? In Liam's example he just sets the queue to the empty queue.
-$q : [True, ~ q = ( N, 0, [])] \refinedby initq(q)$ \\
+$q : [True, ~ q = ( N, n, s) \land n = 0] \refinedby initq(q)$ \\
 \textbf{Enq:} \\
-$q : [n <= N, ~ q = ( N, n_0 + 1, xs_0)] \refinedby enq(q, x)$ \\
+$q : [n <= N, ~ q = ( N, n, xs_0) \land n \neq 0] \refinedby enq(q, x)$ \\
 \textbf{Deq:} \\
 $q,x : [n > 0, q = (N, n_0-1, s_0) \land x = s[n_0 - 1]] \refinedby x := deq(q)$ \\
 \textbf{isEmpty:} \\
 $b : [q = (N, n, s), b \iff n = 0 ] \refinedby b := isEmpty(q)$\\
+%
+\subsection{Refinement}
+We begin by refining the provided specification of \textsc{Search}: \\ \\
+%
+\textbf{proc }{\textsc{Search}(\textbf{value} $t$, \textbf{value} $N$, \textbf{value} $k$, \textbf{result} $v$, \textbf{result} $f$) $\cdot$\\
+\[ t, N, k, v, f: \left[
+    \begin{array}{l} 
+	\textsc{Tree}(t) \land \text{max}_{i\in\N} | \Gamma^i_t (r_t)  \cup \Gamma^{i+1}_t (r_t) | \leq N ,\\
+	(f \land \exists w \in V_{t_0} (\kappa_{t_0}(w) = k_0 \land \lambda_{t_0} (w) = v)) ~ \lor \\
+	(\neg f  \land \forall w \in V_{t_0} (\kappa_{t_0}(w) \neq k_0))
+    \end{array} 
+\right] \] \\
+%
+%
+\rc{c-frame} \\ 
+$\null \quad \nt{v, f: \left[
+    \begin{array}{l} 
+	\textsc{Tree}(t) \land \text{max}_{i\in\N} | \Gamma^i_t (r_t)  \cup \Gamma^{i+1}_t (r_t) | \leq N ,\\
+	(f \land \exists w \in V_{t} (\kappa_{t}(w) = k \land \lambda_{t} (w) = v)) ~ \lor \\
+	(\neg f  \land \forall w \in V_{t} (\kappa_{t}(w) \neq k))
+    \end{array} 
+\right]}{(1)}$ \\ \\
+%
+\\ In order to use a breadth first search along the tree, we need a queue. Thus we must create a queue variable and initialise it to an empty queue: \\  \\
+%I LOC
+(1) \rc{i-loc} \explain{q doesn't occur yet} \\
+\null \quad \textbf{var } q : $\mathcal{Q}~\cdot$ 
+$v, f, q \left[ 
+~pre(1),~
+post(1)~
+\right]$ \\ \\
+%
+%
+% SEQ
+\rc{seq} \explain{so we can refine to initq}\\
+$ \null \quad v, f, q : \left[ 
+	~ True, ~
+	pre(1) \land q = (N,n,s) \land n = 0
+\right]$; \\
+$ \null \quad v, f, q : \left[ 	
+	pre(1) \land q = (N,n,s) \land n = 0, ~
+	post(1)
+\right]$ \\ \\
+%
+%
+\rc{initq} \explain{}\\
+$ \null \quad initq(q);$ \\
+$ \null \quad \nt{v, f, q : \left[ 	
+	pre(1) \land q = (N,n,s) \land n = 0, ~
+	post(1)
+\right]}{(2)}$ \\ \\
+%
+\textcolor{red}{\textbf{TODO:} FIX UP THIS SECTION} \\
+%
+%
+Similarly, we push our initial element $r_t$ onto the queue: \\
+%
+(2) \rc{seq, con} \explain{We introduce a constant to freeze the value of $n$} \\
+$ \null \quad \textbf{con } m \cdot v, f, q : \left[ 	
+\begin{array}{l}
+	pre(1) \land q = (N,n,s) \land n = 0 \land m = n,  \\
+	pre(1) \land q = (N,m + 1,r_t) \land n \neq 0 
+\end{array}
+\right]$; \\
+$ \null \quad \quad \quad  \quad \quad v, f, q : \left[ 	
+	~pre(1) \land q = (N,m + 1,r_t) \land n \neq 0, ~
+	post(1)
+\right]$ \\ \\
+%
+\rc{enq} \\
+$ \null \quad enq(q, r_t)$; \\
+$ \null \quad \nt{v, f, q : \left[ 	
+	~pre(1) \land q = (N,m + 1,r_t) \land n \neq 0, ~
+	post(1)
+\right]}{(3)}$ \\ \\
+%
+Now we set our result flag $f$ to false so we can begin our traversal: \\ \\
+%
+(3) \rc{seq, ass} \explain{} \\
+$ \null \quad f := False;$ \\
+$ \null \quad \nt{v, f, q : \left[ 	
+	pre(1) \land q = (N,n,s) \land n \neq 0 \land f = False, ~
+	post(1)
+\right]}{(4)}$ \\ \\
+%
+Now we conquer the more difficult task of refining our loop. We begin with a sequential composition: \\
+%
+(4) \rc{seq} \explain{} \\
+$ \null \quad \nt{v, f, q : \left[ 	
+	pre(1) \land q = (N,n,s), ~
+	pre(1) \land q = (N,n,s) \land (f \lor n = 0) ~
+\right];}{(5)}$ \\
+$ \null \quad v, f, q : \left[ 	
+	pre(1) \land q = (N,n,s) \land (f \lor n = 0), ~
+	post(1)
+\right]$ \\ \\
+%
+And now we refine (5) into our main loop: \\
+%
 
+(5) \rc{while} \\
+\begin{algorithm}[H]
+\While {$\neg (f \lor isEmpty(q))$} {
+	$v, f, q : \left[
+	\begin{array}{l}
+		pre(1) \land q = (N,n,s) \land \neg f \land n \neq 0, \\
+		pre(1) \land q = (N,n,s)
+	\end{array}
+	\right]$
+} 
+\end{algorithm}
 
+Where our loop invariant is:
+
+\begin{equation*}
+	\begin{array}{l}
+		Inv : \exists i \cdot  (q = \{\Gamma_g^{i+1}(r) \setminus \Gamma_g^i(r) \} \land \forall w \in \Gamma_g^i(r) \cdot \kappa_g(w) \neq k ) \\
+			 \quad \quad \quad \lor ~ ( \exists w \in \bigcup_{n=0}^{i} \Gamma_g^n(r) \cdot \kappa_g(w) = k )
+		\end{array}
+\end{equation*}
 
 \end{document}
 
@@ -82,5 +200,3 @@ $
 $
 }
 \end{algorithm}
-
-
