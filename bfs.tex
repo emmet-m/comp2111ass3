@@ -124,18 +124,18 @@ Similarly, we push our initial element $r_t$ onto the queue: \\
 $ \null \quad \textbf{con } m \cdot v, f, q : \left[ 	
 \begin{array}{l}
 	pre(1) \land q = (N,n,s) \land n = 0 \land m = n,  \\
-	pre(1) \land q = (N,m + 1,r_t) \land n \neq 0 
+	pre(1) \land q = (N,n,r_t) \land n \neq 0 \land n = m + 1
 \end{array}
 \right]$; \\
 $ \null \quad \quad \quad  \quad \quad v, f, q : \left[ 	
-	~pre(1) \land q = (N,m + 1,r_t) \land n \neq 0, ~
+	~pre(1) \land q = (N,n,r_t) \land n \neq 0 \land n = m + 1, ~
 	post(1)
 \right]$ \\ \\
 %
 \rc{enq} \\
 $ \null \quad enq(q, r_t)$; \\
 $ \null \quad \nt{v, f, q : \left[ 	
-	~pre(1) \land q = (N,m + 1,r_t) \land n \neq 0, ~
+	~pre(1) \land q = (N,n,r_t) \land n \neq 0 \land n = m + 1, ~
 	post(1)
 \right]}{(3)}$ \\ \\
 %
@@ -144,13 +144,13 @@ Now we set our result flag $f$ to false so we can begin our traversal: \\ \\
 (3) \rc{seq, ass} \explain{} \\
 $ \null \quad f := False;$ \\
 $ \null \quad \nt{v, f, q : \left[ 	
-	pre(1) \land q = (N,n,s) \land n \neq 0 \land f = False, ~
+	pre(1) \land q = (N,n,s) \land n \neq 0 \land f = False \land n = m + 1, ~
 	post(1)
 \right]}{(4)}$ \\ \\
 %
 Now we conquer the more difficult task of refining our loop. We begin with a sequential composition: \\
 %
-(4) \rc{seq} \explain{} \\
+(4) \rc{seq, w-pre} \explain{Remove our constant $n \neq 0$, and our flag $f$ from our precondition with a w-pre} \\
 $ \null \quad \nt{v, f, q : \left[ 	
 	pre(1) \land q = (N,n,s), ~
 	pre(1) \land q = (N,n,s) \land (f \lor n = 0) ~
@@ -163,7 +163,7 @@ $ \null \quad v, f, q : \left[
 And now we refine (5) into our main loop: \\
 %
 
-(5) \rc{while} \\
+(5) \rc{while, isEmpty} \\
 \begin{algorithm}[H]
 \While {$\neg (f \lor isEmpty(q))$} {
 	$v, f, q : \nt{\left[
@@ -175,7 +175,7 @@ And now we refine (5) into our main loop: \\
 } 
 \end{algorithm}
 
-Where our loop invariant is:
+Where our loop invariant is: \textcolor{red}{TODO: Should q be equal to a set? Shouldn't it be q.s?}
 
 \begin{equation*}
 	\begin{array}{l}
