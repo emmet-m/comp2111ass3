@@ -30,9 +30,11 @@
 \newcommand{\leftcurlyBoy}{\{}
 \newcommand{\rightcurlyBoy}{\}}
 
+
 % This is just fun:
 \newcommand{\que}[1]{\langle #1 \rangle}
 \newcommand{\explain}[1]{\textcolor{RoyalBlue}{\textit{#1}}}
+\newcommand{\tabb}{\null \quad}
 
 % Document starts here
 \begin{document}
@@ -58,7 +60,7 @@ $q : [True, ~ q = ( N, n, s) \land n = 0] \refinedby initq(q)$ \\
 \textbf{Enq:} \\
 $q : [n <= N, ~ q = ( N, n, xs_0) \land n \neq 0] \refinedby enq(q, x)$ \\
 \textbf{Deq:} \\
-$q,x : [n > 0, q = (N, n_0-1, s_0) \land x = s[n_0 - 1]] \refinedby x := deq(q)$ \\
+$q,x : [n > 0, q = (N, n, s_0) \land x = s[n] \land n = n_0 - 1] \refinedby x := deq(q)$ \\
 \textbf{isEmpty:} \\
 $b : [q = (N, n, s), b \iff n = 0 ] \refinedby b := isEmpty(q)$\\
 %
@@ -164,12 +166,12 @@ And now we refine (5) into our main loop: \\
 (5) \rc{while} \\
 \begin{algorithm}[H]
 \While {$\neg (f \lor isEmpty(q))$} {
-	$v, f, q : \left[
+	$v, f, q : \nt{\left[
 	\begin{array}{l}
 		pre(1) \land q = (N,n,s) \land \neg f \land n \neq 0, \\
 		pre(1) \land q = (N,n,s)
 	\end{array}
-	\right]$
+	\right]}{(6)}$
 } 
 \end{algorithm}
 
@@ -180,8 +182,51 @@ Where our loop invariant is:
 		Inv : \exists i \cdot  (q = \{\Gamma_g^{i+1}(r) \setminus \Gamma_g^i(r) \} \land \forall w \in \Gamma_g^i(r) \cdot \kappa_g(w) \neq k ) \\
 			 \quad \quad \quad \lor ~ ( \exists w \in \bigcup_{n=0}^{i} \Gamma_g^n(r) \cdot \kappa_g(w) = k )
 		\end{array}
-\end{equation*}
-
+\end{equation*} \\
+Now we make the first step of getting a node to search over via \textsc{Deq}: \\ \\
+(6) \rc{i-loc, seq, deq} \explain{As we have n $\neq$ 0 in the precondition of (6) we can refine into deq() using a sequential composition} \\ \\
+$
+\null \quad \textbf{var } t \cdot 
+t := deq(q); \\
+\null \quad \nt{v, f, q, t : \left[ pre(6) \land t = s[n], post(6) \right]}{(7)}
+$ \\ \\
+We now need a conditional to check if our current node $t$ is our goal. \\ \\
+%
+%
+%
+%
+(7) \rc{if} \explain{} \\
+\begin{algorithm}[H]
+\eIf { $\kappa_g(t) = k$ } {
+$\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_g(t) = k, post(6) \right]}{(8)}$
+} {
+$\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_g(t) \neq k, post(6) \right]}{(9)}$
+}
+\end{algorithm}
+%
+\noindent
+(8) refines into our goal state, where we set the flag to true and assign the payload. \\ \\
+%
+%
+(8) \rc{seq}  \explain{} \\
+\tabb $v, f, q, t : \left[ 
+\begin{array}{l}
+pre(6) \land t = s[n] \land \kappa_g(t) = k, \\
+pre(6) \land t = s[n] \land \kappa_g(t) = k \land v = \lambda_g(t)
+\end{array}
+\right];$ \\ \\
+\tabb $v, f, q, t : \left[ ~pre(6) \land t = s[n] \land \kappa_g(t) = k \land v = \lambda_g(t), post(6) \right]$ \\ \\
+%
+\tabb \rc{ass} \explain{}  \\
+\tabb v := $\lambda_g(t)$; \\
+\tabb $v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_g(t) = k \land v = \lambda_g(t), post(6) \right]$ \\
+%
+\tabb \rc{s-post, ass} \explain{}  \\
+\tabb v := $\lambda_g(t)$; \\
+\tabb f := \textit{True} \\
+%
+\textcolor{magenta}{la de da enq the shit in (9)}
+%
 \end{document}
 
 
