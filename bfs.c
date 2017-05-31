@@ -11,7 +11,7 @@
 void search (Tree root, unsigned int N, Key key, T *val, RetVal *found) {
 	Queue q;
 	initq(N, q);
-    enqueue(root);
+    enqueue(q,root);
 	found = Failure;
 	while (! (isEmpty(q) || found)) {
 		Tree n = dequeue(q);
@@ -20,6 +20,10 @@ void search (Tree root, unsigned int N, Key key, T *val, RetVal *found) {
 			*found = Success;
 		} else {
 			List curr = n->list;
+			while (curr != null) {
+				enq(q,curr->n);
+				curr = curr->next;
+			}
 		}
 	}
 }

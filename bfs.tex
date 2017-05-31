@@ -12,7 +12,7 @@
 \usepackage{algorithm2e}
 \usepackage{algpseudocode}
 
-\allowdisplaybreaks
+\allowdisplaybreaks 
 
 \title{\texttt{$\mathbb{C}$ase $\mathbb{S}$tudy: $\mathbb{H}$elp us oh $\mathcal{HELP}$}}
 \author{$\mathbb{E}$mmet $\mathbb{M}$urray z5059840, $\mathbb{D}$anni $\mathbb{O}$vens z5059491}
@@ -35,6 +35,8 @@
 \newcommand{\que}[1]{\langle #1 \rangle}
 \newcommand{\explain}[1]{\textcolor{RoyalBlue}{\textit{#1}}}
 \newcommand{\tabb}{\null \quad}
+\newcommand{\tabbb}{\null \quad \quad}
+\newcommand{\tabbbb}{\null \quad \quad \quad}
 
 % Document starts here
 \begin{document}
@@ -47,7 +49,7 @@ We will begin by defining some abstract queue operations in our toy language: \\
 {\LARGE{\textsc{Queue:}}\normalsize}
 \end{center}
 \begin{equation*}
-\mathcal{Q} :: ( \N~:~N, \N~:~n, V_{g}^{*}~:~s ) \\
+\mathcal{Q} :: ( N:\N, ~n:\N, ~s:V_{t}^{*} ) \\
 \end{equation*} \\
 %
 Where $N$ is the max size of the queue, $n$ is the current size, and $s$ is a sequence of queue values. \\
@@ -61,6 +63,8 @@ $q : [True, ~ q = ( N, n, s) \land n = 0] \refinedby initq(q)$ \\
 $q : [n <= N, ~ q = ( N, n, xs_0) \land n \neq 0] \refinedby enq(q, x)$ \\
 \textbf{Deq:} \\
 $q,x : [n > 0, q = (N, n, s_0) \land x = s[n] \land n = n_0 - 1] \refinedby x := deq(q)$ \\
+\textbf{WhosNext:} \\
+$q,x : [q = (N, ys), q = q_0 \land x = y] \refinedby x := whosNext(q)$ \\
 \textbf{isEmpty:} \\
 $b : [q = (N, n, s), b \iff n = 0 ] \refinedby b := isEmpty(q)$\\
 %
@@ -115,8 +119,6 @@ $ \null \quad \nt{v, f, q : \left[
 	post(1)
 \right]}{(2)}$ \\ \\
 %
-\textcolor{red}{\textbf{TODO:} FIX UP THIS SECTION} \\
-%
 %
 Similarly, we push our initial element $r_t$ onto the queue: \\
 %
@@ -150,20 +152,16 @@ $ \null \quad \nt{v, f, q : \left[
 %
 Now we conquer the more difficult task of refining our loop. We begin with a sequential composition: \\
 %
-(4) \rc{seq, w-pre} \explain{Remove our constant $n \neq 0$, and our flag $f$ from our precondition with a w-pre} \\
+(4) \rc{w-pre} \explain{Remove our constant m from our precondition with a w-pre} \\
 $ \null \quad \nt{v, f, q : \left[ 	
-	pre(1) \land q = (N,n,s), ~
-	pre(1) \land q = (N,n,s) \land (f \lor n = 0) ~
-\right];}{(5)}$ \\
-$ \null \quad v, f, q : \left[ 	
-	pre(1) \land q = (N,n,s) \land (f \lor n = 0), ~
-	post(1)
-\right]$ \\ \\
+	pre(1) \land q = (N,n,s) \land n \neq 0 \land f = False, ~
+	post(1) ~
+\right]}{(5)}$ \\
 %
 And now we refine (5) into our main loop: \\
 %
 
-(5) \rc{while, isEmpty} \\
+(5) \rc{while, isEmpty}  \\
 \begin{algorithm}[H]
 \While {$\neg (f \lor isEmpty(q))$} {
 	$v, f, q : \nt{\left[
@@ -175,14 +173,18 @@ And now we refine (5) into our main loop: \\
 } 
 \end{algorithm}
 
-Where our loop invariant is: \textcolor{red}{TODO: Should q be equal to a set? Shouldn't it be q.s?}
+Where our loop invariant is:
 
 \begin{equation*}
+Inv : \left(
 	\begin{array}{l}
-		Inv : \exists i \cdot  (q = \{\Gamma_g^{i+1}(r) \setminus \Gamma_g^i(r) \} \land \forall w \in \Gamma_g^i(r) \cdot \kappa_g(w) \neq k ) \\
-			 \quad \quad \quad \lor ~ ( \exists w \in \bigcup_{n=0}^{i} \Gamma_g^n(r) \cdot \kappa_g(w) = k )
-		\end{array}
+		 \exists i \in \N .\Big(\forall e \in s . (e \in \Gamma^i_t(r) \cup \Gamma^{i+1}_t(r))  \\
+			  \land ~ \forall z \in \Gamma^{i}_t(r). e \in \Gamma(z) \implies z \notin s \land \kappa_t(z) \notin k \Big) \\
+			  \lor ~ ( \exists w \in V_t. ~w \in \Gamma_t^*(r_t) \land \kappa_t(w) = k \land \lambda_t(w) = v)
+		\end{array} \right)
 \end{equation*} \\
+There are a few cases of the state of the queue that were unnecessary to consider due to the definition of a tree.
+We are able to represent the queue's set directly as the descendants of the current node being explored as it is a precondition that all nodes have a unique parent, implying that no node can be added multiple times. This is cemented by the lack of cycles in the tree. \\ \\
 Now we make the first step of getting a node to search over via \textsc{Deq}: \\ \\
 (6) \rc{i-loc, seq, deq} \explain{As we have n $\neq$ 0 in the precondition of (6) we can refine into deq() using a sequential composition} \\ \\
 $
@@ -197,10 +199,10 @@ We now need a conditional to check if our current node $t$ is our goal. \\ \\
 %
 (7) \rc{if} \explain{} \\
 \begin{algorithm}[H]
-\eIf { $\kappa_g(t) = k$ } {
-$\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_g(t) = k, post(6) \right]}{(8)}$
+\eIf { $\kappa_t(t) = k$ } {
+$\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_t(t) = k, post(6) \right]}{(8)}$
 } {
-$\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_g(t) \neq k, post(6) \right]}{(9)}$
+$\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_t(t) \neq k, post(6) \right]}{(9)}$
 }
 \end{algorithm}
 %
@@ -211,22 +213,44 @@ $\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_g(t) \neq k, post(6)
 (8) \rc{seq}  \explain{} \\
 \tabb \quad $v, f, q, t : \left[ 
 \begin{array}{l}
-pre(6) \land t = s[n] \land \kappa_g(t) = k, \\
-pre(6) \land t = s[n] \land \kappa_g(t) = k \land v = \lambda_g(t)
+pre(6) \land t = s[n] \land \kappa_t(t) = k, \\
+pre(6) \land t = s[n] \land \kappa_t(t) = k \land v = \lambda_t(t)
 \end{array}
 \right];$ \\ \\
-\tabb \quad $v, f, q, t : \left[ ~pre(6) \land t = s[n] \land \kappa_g(t) = k \land v = \lambda_g(t), post(6) \right]$ \\ \\
+\tabb \quad $v, f, q, t : \left[ ~pre(6) \land t = s[n] \land \kappa_t(t) = k \land v = \lambda_t(t), post(6) \right]$ \\ \\
 %
 \tabb \rc{ass} \explain{}  \\
-\tabb \quad  v := $\lambda_g(t)$; \\
-\tabb \quad $v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_g(t) = k \land v = \lambda_g(t), post(6) \right]$ \\
+\tabb \quad  v := $\lambda_t(t)$; \\
+\tabb \quad $v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_t(t) = k \land v = \lambda_t(t), post(6) \right]$ \\
 %
 \tabb \rc{s-post, ass} \explain{}  \\
-\tabb \quad  v := $\lambda_g(t)$; \\
-\tabb \quad  f := \textit{True} \\
+\tabb \quad  v := $\lambda_t(t)$; \\
+\tabb \quad  f := \textit{True} \\ \\
 %
-\textcolor{magenta}{la de da enq the shit in (9)}
+Now returning to (9), we need to enqueue all of the successors of the current node. Using the successor function $\Gamma$ to retrieve a set of all successors: \\ \\
 %
+(9) \rc{i-loc, seq, ass} \explain{Create a copy of the set of successors} \\
+\tabb \textbf{var } succ $\cdot$
+succ := $\Gamma_t(t)$; \\
+\tabb $\nt{v, f, q, t, succ : \left[ pre(6) \land t = s[n] \land \kappa_t(t) \neq k \land succ = \Gamma_t(t), post(6) \right]}{(10)}$ \\\\
+%
+Now looping through the set, we pick an element from the set each time and enqueue it in our queue.
+% l is for leaf
+\begin{equation*}
+\begin{array}{l}
+\end{array}
+\end{equation*}
+%
+(10) \rc{while, seq x 2, ass x 2, enq} \\
+\begin{algorithm}[H]
+\While {succ $\neq \varnothing$} {
+\textbf{var} $l :\in succ$ \\
+enq(q, l) \\
+$succ := succ \setminus \{ l\}$ 
+}
+\end{algorithm} 
+%
+Now we
 \end{document}
 
 
