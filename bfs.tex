@@ -15,7 +15,7 @@
 
 \allowdisplaybreaks 
 
-\title{\texttt{$\mathbb{C}$ase $\mathbb{S}$tudy: $\mathbb{H}$elp us oh $\mathcal{HELP}$}}
+\title{Assignment 3:}
 \author{$\mathbb{E}$mmet $\mathbb{M}$urray z5059840, $\mathbb{D}$anni $\mathbb{O}$vens z5059491}
 
 % Danni's awesome and super helpful math things y@y
@@ -102,6 +102,7 @@ $x : [q = (N, sy), x = y] \refinedby x := whosNext(q)$ \\
 \textbf{isEmpty:} \\
 $b : [q = (N, s), b \iff |s| = 0 ] \refinedby b := isEmpty(q)$\\
 %
+\pagebreak
 \subsection{Refinement}
 We begin by refining the provided specification of \textsc{Search}: \\ \\
 %
@@ -193,7 +194,7 @@ $ \null \quad \nt{v, f, q : \left[
 %
 Now we conquer the more difficult task of refining our loop. We begin with a sequential composition: \\
 %
-(4) \rc{w-pre} \explain{Remove auxillary statements from our precondition with a w-pre} \\
+(4) \rc{w-pre} \explain{Remove auxiliary statements from our precondition with a w-pre} \\
 $ \null \quad \nt{v, f, q : \left[ 	
 \begin{array}{l}
 	pre(1) \land q = (N,s) \land |s| \neq 0 \land \neg f, \\
@@ -236,7 +237,11 @@ Inv : \left(
 \end{equation*} \\ 
 There are a few cases of the state of the queue that were unnecessary to consider due to the definition of a tree.
 We are able to represent the queue as a set directly as the elements in the queue at any given time will be unique, as no node can be added multiple times. This is due to the acyclic nature of the tree structure. \\ \\
-(6) \rc{i-loc, seq x 2, con, c-frame} \explain{We split up our statement so we can perform deq() and whosNext(). Note here we've rewritten our queue sequence $s$ as $ys$, where $y = s_1 \land s = s_{2..}$. And by $s_1$ I mean the first element in the sequence s. This can be achieved as $|s| \neq 0$. We also remove q from the frame so that we can refine to whosNext()} \\ \\
+%
+Clearly, the only element in the queue is the root node. Thus, there is an i, $0$, where all of the elements of the set $\llcorner s \lrcorner$ are contained in $\Gamma^0_t(r_t) \cup \Gamma^1_t(r_t)$. As per the definition of the successor function and the identity properties of the zero exponent, it is trivial that $\Gamma^0_t(r_t) = r_t$.\\ 
+This satisfies the first conjunct of our invariant. \\
+Secondly, since no successors of the root node are in the queue, the second conjunct holds as $False \implies True$.\\ \\
+(6) \rc{i-loc, seq x 2, con, c-frame} \explain{We sequentially composed our statement so that we can perform the operations deq() and whosNext(). Note here we've rewritten our queue's sequence as $ys$, where $y = s_1 \land s = s_{2}...$. For this implementation we have defined $s_1$ as the first element in the sequence s, and so forth. This can be achieved as $|s| \neq 0$. We also remove q from the frame so that we can refine to whosNext()} \\ \\
 $
 \null \quad \textbf{con } y \cdot \textbf{var } e : V_t \cdot \\
 \null \quad v, f, e : \left[ pre(1) \land q = (N, sy), pre(1) \land q = (N, sy) \land e = y \right] \\
@@ -244,14 +249,14 @@ $
 \null \quad v, f, q, e : \left[ pre(6) \land e = y, post(6) \right]
 $ \\ \\
 Now we make the first step of getting a node to search over via \textsc{Deq}: \\ \\
-(6) \rc{deq, whosNext} \explain{As we have n $\neq$ 0 in the precondition of (6) we can get the first element with whosNext() and remove it from the queue with deq()} \\ \\
+(6) \rc{deq, whosNext} \explain{As we have n $\neq$ 0 in the precondition of (6) we can get the first element with whosNext() and then remove it from the queue with deq().} \\ \\
 $
 \null \quad \textbf{var } e : V_t \cdot 
 e := whosNext(q); \\
 \tabb deq(q); \\ 
 \null \quad \nt{v, f, q, e : \left[ pre(6) \land e = y, post(6) \right]}{(7)}
 $ \\ \\
-We now need a conditional to check if our current node $t$ is our goal. \\ \\
+We now need a conditional statement to check if the current node $t$ is our goal. \\ \\
 %
 %
 %
@@ -288,7 +293,7 @@ pre(6) \land e = y \land \kappa_t(e) = k \land v = \lambda_t(t)
 %
 Now returning to (9), we need to enqueue all of the successors of the current node. Using the successor function $\Gamma$ to retrieve a set of all successors: \\ \\
 %
-(9) \rc{i-loc, seq, ass} \explain{Create a copy of the set of successors} \\
+(9) \rc{i-loc, seq, ass} \explain{Create a variable to store the set of successors.} \\
 \tabb \textbf{var } succ $\cdot$
 succ := $\Gamma_t(e)$; \\
 \tabb $\nt{v, f, q, e, succ : \left[ pre(6) \land e = y \land \kappa_t(e) \neq k \land succ = \Gamma_t(e), post(6) \right]}{(10)}$ \\\\
@@ -335,6 +340,7 @@ f := $False$; \\
 \end{algorithm}
 %
 Note here our \ab{abstract} queue operations are highlighted in \ab{Wild Strawberry}.
+\pagebreak
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
