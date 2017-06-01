@@ -3,16 +3,6 @@
 #include "bbq.h"
 
 // Queue implementation goes here
-typedef struct q {
-	int size;
-	Tree * values;
-	int enqIndex;
-	int deqIndex;
-} * Queue;
-
-void initq(int size, Queue q);
-int sizeq(Queue q);
-Tree dequeue(Queue q);
-void enqueue(Tree t);
+void search (Tree root, unsigned int N, Key key, T *val, RetVal *found);
 
 #endif
