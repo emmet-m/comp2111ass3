@@ -532,11 +532,25 @@ f := $False$; \\
 	}
 }
 \end{algorithm}
-
-Yea the implementation! \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
+\pagebreak
 
 \section{C code}
 
 \lstinputlisting{bfs.c}
+
+\noindent
+We make a few adjustments between the C code and our implementation. \\
+
+\noindent
+Firsly, our C code uses the provided linked list of successors as opposed to the set we defined. This means that rather than picking and removing an element from the linked list, we merely take the element and iterate over to the next element in the list. Thus, our condition that $succ \neq \varnothing$ is equated to 'succ != NULL'. 
+
+\noindent
+Our payload and key functions are equated to accessing the $value$ and $id$ fields of the tree node. \\
+
+\noindent
+Any references to $(\mathit{mod} N + 1)$ are replaced with the C equivalent \textit{ \% (N + 1)}.
+
+\noindent
+Our $r$, $f$, $k$ and $v$ variables are the provided \textit{root}, \textit{found}, \textit{key} \textit{val} respectively.
 
 \end{document}
