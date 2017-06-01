@@ -24,6 +24,7 @@
 \newcommand\textlcsc[1]{\textsc{\MakeLowercase{#1}}} % pretty small uppercase letters
 %This is actually the best thing we've probably ever done
 \newcommand{\rc}[1]{ $\refinedby$ \quad \textbf{\textcolor{ForestGreen}{$\langle$ #1 $\rangle$}}}
+\newcommand{\sset}[1]{ \llcorner #1 \lrcorner }
 
 %I cna't live without this:
 \newcommand{\squigglyBoy}{~}
@@ -62,9 +63,9 @@ We can now define our 5 core abstract queue operations: \\ \\
 % Do we even need this? In Liam's example he just sets the queue to the empty queue.
 $q : [True, ~ q = ( N, s) \land |s| = 0] \refinedby initq(q)$ \\
 \textbf{Enq:} \\
-$q : [n <= N, ~ q = ( N, xs_0) \land |s| \neq 0] \refinedby enq(q, x)$ \\
+$q : [n <= N, ~ q = ( N, s) \land s = xs_0 \land |s| \neq 0] \refinedby enq(q, x)$ \\
 \textbf{Deq:} \\
-$q : [n > 0 \land q = (N, xs), q = (N, s_0) ] \refinedby  deq(q)$ \\
+$q : [n > 0 \land q = (N, xs), q = (N, s) \land s = s_0 ] \refinedby  deq(q)$ \\
 \textbf{WhosNext:} \\
 $q,x : [q = (N, sy), q = q_0 \land x = y] \refinedby x := whosNext(q)$ \\
 \textbf{isEmpty:} \\
@@ -124,36 +125,37 @@ $ \null \quad \nt{v, f, q : \left[
 %
 Similarly, we push our initial element $r_t$ onto the queue: \\
 %
-(2) \rc{seq} \explain{We introduce a constant to freeze the value of $n$} \\
-$ \null \quad v, f, q : \left[ 	
+(2) \rc{seq, con} \explain{} \\
+$ \null \quad \textbf{con } m \cdot \\
+\tabb v, f, q : \left[ 	
 \begin{array}{l}
-	pre(1) \land q = (N,s) \land |s| = 0,  \\
-	pre(1) \land q = (N,xs) \land |s| \neq 0 \land x = r_t
+	pre(1) \land q = (N,s) \land |s| = 0 \land m = s,  \\
+	pre(1) \land q = (N,s) \land s = xm \land |s| \neq 0 \land x = r_t
 \end{array}
 \right]$; \\
 $ \tabb v, f, q : \left[ 	
 \begin{array}{l}
-	pre(1) \land q = (N,xs) \land |s| \neq 0 \land x = r_t, \\
+	pre(1) \land q = (N,s) \land s = xm \land |s| \neq 0 \land x = r_t, \\
 	post(1)
 \end{array}
 \right]$ \\ \\
 %
-\rc{enq} \\
+\rc{enq} \explain{} \\
 $ \null \quad enq(q, r_t)$; \\
 $ \null \quad \nt{v, f, q : \left[ 	
 \begin{array}{l}
-	pre(1) \land q = (N,xs) \land |s| \neq 0  \land x = r_t, \\
+	pre(1) \land q = (N, s) \land s = xm \land |s| \neq 0  \land x = r_t, \\
 	post(1)
 \end{array}
 \right]}{(3)}$ \\ \\
 %
 Now we set our result flag $f$ to false so we can begin our traversal: \\ \\
 %
-(3) \rc{seq, ass} \explain{} \\
+(3) \rc{seq, ass} \explain{ note $\neg f$ is equivalent to $f = False$} \\
 $ \null \quad f := False;$ \\
 $ \null \quad \nt{v, f, q : \left[ 	
 \begin{array}{l}
-	pre(1) \land q = (N,xs) \land |s| \neq 0 \land x = r_t \land f = False, \\
+	pre(1) \land q = (N,s) \land s = xm \land |s| \neq 0 \land x = r_t \land \neg f, \\
 	post(1)
 \end{array}
 \right]}{(4)}$ \\ \\
@@ -163,7 +165,7 @@ Now we conquer the more difficult task of refining our loop. We begin with a seq
 (4) \rc{w-pre} \explain{Remove auxillary statements from our precondition with a w-pre} \\
 $ \null \quad \nt{v, f, q : \left[ 	
 \begin{array}{l}
-	pre(1) \land q = (N,xs) \land |s| \neq 0 \land f = False, \\
+	pre(1) \land q = (N,s) \land |s| \neq 0 \land \neg f, \\
 	post(1)
 \end{array}
 \right]}{(5)}$ \\
@@ -176,7 +178,7 @@ And now we refine (5) into our main loop: \\
 \While {$\neg (f \lor isEmpty(q))$} {
 	$v, f, q : \nt{\left[
 	\begin{array}{l}
-		pre(1) \land q = (N,xs) \land \neg f \land |s| \neq 0, \\
+		pre(1) \land q = (N,s) \land \neg f \land |s| \neq 0, \\
 		pre(1) \land q = (N,s)
 	\end{array}
 	\right]}{(6)}$
@@ -188,19 +190,19 @@ Where our loop invariant is:
 \begin{equation*}
 Inv : \left(
 	\begin{array}{l}
-		 \exists i \in \N .\Big(\forall e \in s . (e \in \Gamma^i_t(r) \cup \Gamma^{i+1}_t(r))  \\
-			  \land ~ \forall z \in \Gamma^{i}_t(r). e \in \Gamma(z) \implies z \notin s \land \kappa_t(z) \notin k \Big) \\
+		 \exists i \in \N .\Big(\forall p \in \sset{s} . (p \in \Gamma^i_t(r) \cup \Gamma^{i+1}_t(r))  \\
+			  \land ~ \forall z \in \Gamma^{i}_t(r). p \in \Gamma(z) \implies (z \notin \sset{s} \land \kappa_t(z) \notin k) \Big) \\
 			  \lor ~ ( \exists w \in V_t. ~w \in \Gamma_t^*(r_t) \land \kappa_t(w) = k \land \lambda_t(w) = v)
 		\end{array} \right)
 \end{equation*} \\ 
 There are a few cases of the state of the queue that were unnecessary to consider due to the definition of a tree.
-We are able to represent the queue's set directly as the elements in the same level as the current node and the descendants of the current node being explored as it is a precondition that all nodes have a unique parent, implying that no node can be added multiple times. This is cemented by the lack of cycles in the tree. \\ \\
-(6) \rc{i-loc, seq x 2} \explain{We split up our statement so we can perform deq() and whosNext()} \\ \\
+We are able to represent the queue as a set directly as the elements in the queue at any given time will be unique, as no node can be added multiple times. This is due to the acyclic nature of the tree structure. \\ \\
+(6) \rc{i-loc, seq x 2, con} \explain{We split up our statement so we can perform deq() and whosNext(). Note here we've rewritten our queue sequence $s$ as $ys$, where $y = s_1 \land s = s_{2..}$. And by $s_1$ I mean the first element in the sequence s. This can be achieved as $|s| \neq 0$.} \\ \\
 $
-\null \quad \textbf{var } t \cdot 
-\null \quad v, f, q, t : \left[ pre(1) \land q = (N, sy), pre(1) \land q = (N, sy) \land t = y \right] \\
-\null \quad v, f, q, t : \left[ pre(1) \land q = (N, sy) \land t = y, pre(1) \land q = (N, s) \land t = y \land n = n_0 - 1 \right] \\ %TODO
-\null \quad v, f, q, t : \left[ pre(6) \land t = s_n, post(6) \right]
+\null \quad \textbf{con } y \cdot \textbf{var } e \cdot \\
+\null \quad v, f, q, e : \left[ pre(1) \land q = (N, sy), pre(1) \land q = (N, sy) \land e = y \right] \\
+\null \quad v, f, q, e : \left[ pre(1) \land q = (N, sy) \land e = y, pre(1) \land q = (N, s) \land e = y  \right] \\
+\null \quad v, f, q, e : \left[ pre(6) \land e = y, post(6) \right]
 $ \\ \\
 Now we make the first step of getting a node to search over via \textsc{Deq}: \\ \\
 (6) \rc{deq, whosNext} \explain{As we have n $\neq$ 0 in the precondition of (6) we can get the first element with whosNext() and remove it from the queue with deq()} \\ \\
@@ -208,7 +210,7 @@ $
 \null \quad \textbf{var } t \cdot 
 t := whosNext(q); \\
 \tabb deq(q); \\ 
-\null \quad \nt{v, f, q, t : \left[ pre(6) \land t = s_n, post(6) \right]}{(7)}
+\null \quad \nt{v, f, q, t : \left[ pre(6) \land e = y, post(6) \right]}{(7)}
 $ \\ \\
 We now need a conditional to check if our current node $t$ is our goal. \\ \\
 %
@@ -217,10 +219,10 @@ We now need a conditional to check if our current node $t$ is our goal. \\ \\
 %
 (7) \rc{if} \explain{} \\
 \begin{algorithm}[H]
-\eIf { $\kappa_t(t) = k$ } {
-$\nt{v, f, q, t : \left[ pre(6) \land t = s_n \land \kappa_t(t) = k, post(6) \right]}{(8)}$
+\eIf { $\kappa_t(e) = k$ } {
+$\nt{v, f, q, e : \left[ pre(6) \land e = y \land \kappa_t(e) = k, post(6) \right]}{(8)}$
 } {
-$\nt{v, f, q, t : \left[ pre(6) \land t = s_n \land \kappa_t(t) \neq k, post(6) \right]}{(9)}$
+$\nt{v, f, q, e : \left[ pre(6) \land e = y \land \kappa_t(e) \neq k, post(6) \right]}{(9)}$
 }
 \end{algorithm}
 %
@@ -229,28 +231,28 @@ $\nt{v, f, q, t : \left[ pre(6) \land t = s_n \land \kappa_t(t) \neq k, post(6) 
 %
 %
 (8) \rc{seq}  \explain{} \\
-\tabb \quad $v, f, q, t : \left[ 
+\tabb \quad $v, f, q, e : \left[ 
 \begin{array}{l}
-pre(6) \land t = s[n] \land \kappa_t(t) = k, \\
-pre(6) \land t = s[n] \land \kappa_t(t) = k \land v = \lambda_t(t)
+pre(6) \land e = y \land \kappa_t(e) = k, \\
+pre(6) \land e = y \land \kappa_t(e) = k \land v = \lambda_t(t)
 \end{array}
 \right];$ \\ \\
-\tabb \quad $v, f, q, t : \left[ ~pre(6) \land t = s[n] \land \kappa_t(t) = k \land v = \lambda_t(t), post(6) \right]$ \\ \\
+\tabb \quad $v, f, q, e : \left[ ~pre(6) \land e = y \land \kappa_t(e) = k \land v = \lambda_t(e), post(6) \right]$ \\ \\
 %
 \tabb \rc{ass} \explain{}  \\
-\tabb \quad  v := $\lambda_t(t)$; \\
-\tabb \quad $v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_t(t) = k \land v = \lambda_t(t), post(6) \right]$ \\
+\tabb \quad  v := $\lambda_t(e)$; \\
+\tabb \quad $v, f, q, e : \left[ pre(6) \land e = y \land \kappa_t(e) = k \land v = \lambda_t(e), post(6) \right]$ \\
 %
 \tabb \rc{s-post, ass} \explain{}  \\
-\tabb \quad  v := $\lambda_t(t)$; \\
+\tabb \quad  v := $\lambda_t(e)$; \\
 \tabb \quad  f := \textit{True} \\ \\
 %
 Now returning to (9), we need to enqueue all of the successors of the current node. Using the successor function $\Gamma$ to retrieve a set of all successors: \\ \\
 %
 (9) \rc{i-loc, seq, ass} \explain{Create a copy of the set of successors} \\
 \tabb \textbf{var } succ $\cdot$
-succ := $\Gamma_t(t)$; \\
-\tabb $\nt{v, f, q, t, succ : \left[ pre(6) \land t = s[n] \land \kappa_t(t) \neq k \land succ = \Gamma_t(t), post(6) \right]}{(10)}$ \\\\
+succ := $\Gamma_t(e)$; \\
+\tabb $\nt{v, f, q, e, succ : \left[ pre(6) \land e = y \land \kappa_t(e) \neq k \land succ = \Gamma_t(e), post(6) \right]}{(10)}$ \\\\
 %
 Now looping through the set, we pick an element from the set each time and enqueue it in our queue.
 % l is for leaf
@@ -268,7 +270,33 @@ $succ := succ \setminus \{ l\}$
 }
 \end{algorithm} 
 %
-Now we
+Now, collecting our code we come to our BFS implementation using an abstract queue: \\
+
+\begin{algorithm}[H]
+\textbf{var} q : $\mathcal{Q} \cdot$ \\
+init(q); \\
+enq(q,$r_t$); \\
+f := $False$; \\
+\While {$\neg( f \lor isEmpty(q))$} {
+	\textbf{var} e$\cdot$ 
+	e := whosNext(q); \\
+	deq(q); \\
+	\eIf {$\kappa_t$(e) = k} {
+		v := $\lambda_t$(e); \\
+		f := $True$ \\
+	} {
+		\textbf{var} succ $\cdot$ succ := $\Gamma_t$(e); \\
+		\While {succ $\neq \varnothing$ } {
+			\textbf{var} l :$\in$ succ; \\
+			enq(q, l); \\
+			succ := succ $\setminus \{l\}$ \\
+		}
+	}
+}
+\end{algorithm}
+
+
+\section{Refining our abstract implementation of a queue}
 \end{document}
 
 
