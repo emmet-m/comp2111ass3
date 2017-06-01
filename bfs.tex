@@ -20,6 +20,8 @@
 % Danni's awesome and super helpful math things y@y
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\Z}{\mathbb{Z}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\Q}{\mathcal{Q}}
 \newcommand{\refinedby}{\sqsubseteq} % THIS IS MY PERSONAL FAV ~refined by~
 \newcommand\textlcsc[1]{\textsc{\MakeLowercase{#1}}} % pretty small uppercase letters
 %This is actually the best thing we've probably ever done
@@ -35,6 +37,8 @@
 % This is just fun:
 \newcommand{\que}[1]{\langle #1 \rangle}
 \newcommand{\explain}[1]{\textcolor{RoyalBlue}{\textit{#1}}}
+\newcommand{\ab}[1]{\textcolor{WildStrawberry}{#1}}
+\newcommand{\concrete}[1]{\textcolor{Aquamarine}{#1}}
 \newcommand{\tabb}{\null \quad}
 \newcommand{\tabbb}{\null \quad \quad}
 \newcommand{\tabbbb}{\null \quad \quad \quad}
@@ -184,22 +188,30 @@ And now we refine (5) into our main loop: \\
 	\right]}{(6)}$
 } 
 \end{algorithm}
-
+%
+\noindent \\
+We derived our invariant based on the following properties of the queue:
+\begin{itemize}
+\item There exists a number $i$, such that the queue will be comprised of elements from the $i$'th and $(i + 1)$'th layer of the tree (in other words, $\Gamma_t^i(r_t)$ and $\Gamma_t^{i+1}(r_t)).$ 
+\item For any element in $i$'th layer of the tree, if any of their successors are in the queue, then that element is not in the queue, and it is not the element we are searching for.
+\item Or, we have found an element $w$ such that it's key matches the element we are searching for.
+\end{itemize}
+%
 Where our loop invariant is:
-
+%
 \begin{equation*}
 Inv : \left(
 	\begin{array}{l}
-		 \exists i \in \N .\Big(\forall p \in \sset{s} . (p \in \Gamma^i_t(r) \cup \Gamma^{i+1}_t(r))  \\
-			  \land ~ \forall z \in \Gamma^{i}_t(r). p \in \Gamma(z) \implies (z \notin \sset{s} \land \kappa_t(z) \notin k) \Big) \\
-			  \lor ~ ( \exists w \in V_t. ~w \in \Gamma_t^*(r_t) \land \kappa_t(w) = k \land \lambda_t(w) = v)
+		 \exists i \in \N .\Big(\forall p \in \sset{s} . (p \in \Gamma^i_t(r) \cup \Gamma^{i+1}_t(r))  \\ % In this level or the next
+			  \land ~ \forall z \in \Gamma^{i}_t(r). p \in \Gamma(z) \implies (z \notin \sset{s} \land \kappa_t(z) \notin k) \Big) \\ % state that parents of any node in the queue not in the queue
+			  \lor ~ ( \exists w \in V_t. ~w \in \Gamma_t^*(r_t) \land \kappa_t(w) = k \land \lambda_t(w) = v) % or, we found a thingo and we exit
 		\end{array} \right)
 \end{equation*} \\ 
 There are a few cases of the state of the queue that were unnecessary to consider due to the definition of a tree.
 We are able to represent the queue as a set directly as the elements in the queue at any given time will be unique, as no node can be added multiple times. This is due to the acyclic nature of the tree structure. \\ \\
 (6) \rc{i-loc, seq x 2, con} \explain{We split up our statement so we can perform deq() and whosNext(). Note here we've rewritten our queue sequence $s$ as $ys$, where $y = s_1 \land s = s_{2..}$. And by $s_1$ I mean the first element in the sequence s. This can be achieved as $|s| \neq 0$.} \\ \\
 $
-\null \quad \textbf{con } y \cdot \textbf{var } e \cdot \\
+\null \quad \textbf{con } y \cdot \textbf{var } e : V_t \cdot \\
 \null \quad v, f, q, e : \left[ pre(1) \land q = (N, sy), pre(1) \land q = (N, sy) \land e = y \right] \\
 \null \quad v, f, q, e : \left[ pre(1) \land q = (N, sy) \land e = y, pre(1) \land q = (N, s) \land e = y  \right] \\
 \null \quad v, f, q, e : \left[ pre(6) \land e = y, post(6) \right]
@@ -207,10 +219,10 @@ $ \\ \\
 Now we make the first step of getting a node to search over via \textsc{Deq}: \\ \\
 (6) \rc{deq, whosNext} \explain{As we have n $\neq$ 0 in the precondition of (6) we can get the first element with whosNext() and remove it from the queue with deq()} \\ \\
 $
-\null \quad \textbf{var } t \cdot 
-t := whosNext(q); \\
+\null \quad \textbf{var } e : V_t \cdot 
+e := whosNext(q); \\
 \tabb deq(q); \\ 
-\null \quad \nt{v, f, q, t : \left[ pre(6) \land e = y, post(6) \right]}{(7)}
+\null \quad \nt{v, f, q, e : \left[ pre(6) \land e = y, post(6) \right]}{(7)}
 $ \\ \\
 We now need a conditional to check if our current node $t$ is our goal. \\ \\
 %
@@ -273,14 +285,14 @@ $succ := succ \setminus \{ l\}$
 Now, collecting our code we come to our BFS implementation using an abstract queue: \\
 
 \begin{algorithm}[H]
-\textbf{var} q : $\mathcal{Q} \cdot$ \\
-init(q); \\
-enq(q,$r_t$); \\
+\textbf{var} q : $\mathcal{Q};$ \\
+\ab{init(q)}; \\
+\ab{enq(q,$r_t$)}; \\
 f := $False$; \\
 \While {$\neg( f \lor isEmpty(q))$} {
-	\textbf{var} e$\cdot$ 
-	e := whosNext(q); \\
-	deq(q); \\
+	\textbf{var} e : $V_t$; \\
+	\ab{e := whosNext(q)}; \\
+	\ab{deq(q)}; \\
 	\eIf {$\kappa_t$(e) = k} {
 		v := $\lambda_t$(e); \\
 		f := $True$ \\
@@ -288,30 +300,43 @@ f := $False$; \\
 		\textbf{var} succ $\cdot$ succ := $\Gamma_t$(e); \\
 		\While {succ $\neq \varnothing$ } {
 			\textbf{var} l :$\in$ succ; \\
-			enq(q, l); \\
+			\ab{enq(q, l)}; \\
 			succ := succ $\setminus \{l\}$ \\
 		}
 	}
 }
 \end{algorithm}
-
-
+%
+Note here our \ab{abstract} queue operations are highlighted in \ab{Wild Strawberry}.
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
 \section{Refining our abstract implementation of a queue}
+%
+\subsection{Step 1}
+%
+We begin by introducing new variables to describe our concrete implementation. We require: \\
+%
+\begin{itemize}
+\item An array $A : V_t^{N+1}$ to store our queue elements.
+\item An enqueue counter $n : \N$ to mark where we push elements to the queue.
+\item A dequeue counter $m : \N$ to mark where we pop elements from the queue.
+\end{itemize}
+%
+Note that both $n$ and $m$ are bounded by the conditions $0 \leq n < N + 1$ and $0 \leq m < N + 1$ respectively.
+%
+\subsection{Step 2}
+%
+Now we define our coupling invariant to relate our concrete and abstract implementations:
+%
+ \[\C : \Q \times V_t^* \times \N \times \N \to \mathbb{B} \]
+ \[\C((N, s), A, n, m) = \Big( \forall i \in [0, |s|]. ~A[(m + i)(mod N + 1)] = s_i\Big)\]
+%
+%
+\subsection{Step 3}
+%
+Step 3 comes later yo
+%
 \end{document}
-
-
-
- ALGORITHM README
-
-\begin{algorithm}[H]
- %Condition inside first brackets
-\eIf {$$} {
- If part follows
-$
-$
-}{
- Else part
-$
-$
-}
-\end{algorithm}
