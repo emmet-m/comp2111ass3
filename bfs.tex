@@ -98,7 +98,7 @@ $q : [|s| < N, ~ q = ( N, s) \land s = xs_0 \land |s| \neq 0] \refinedby enq(q, 
 \textbf{Deq:} \\
 $q : [|sx| > 0 \land q = (N, sx), q = (N, s) \land s = s_0 ] \refinedby  deq(q)$ \\
 \textbf{WhosNext:} \\
-$q,x : [q = (N, sy), q = q_0 \land x = y] \refinedby x := whosNext(q)$ \\
+$x : [q = (N, sy), x = y] \refinedby x := whosNext(q)$ \\
 \textbf{isEmpty:} \\
 $b : [q = (N, s), b \iff |s| = 0 ] \refinedby b := isEmpty(q)$\\
 %
@@ -236,10 +236,10 @@ Inv : \left(
 \end{equation*} \\ 
 There are a few cases of the state of the queue that were unnecessary to consider due to the definition of a tree.
 We are able to represent the queue as a set directly as the elements in the queue at any given time will be unique, as no node can be added multiple times. This is due to the acyclic nature of the tree structure. \\ \\
-(6) \rc{i-loc, seq x 2, con} \explain{We split up our statement so we can perform deq() and whosNext(). Note here we've rewritten our queue sequence $s$ as $ys$, where $y = s_1 \land s = s_{2..}$. And by $s_1$ I mean the first element in the sequence s. This can be achieved as $|s| \neq 0$.} \\ \\
+(6) \rc{i-loc, seq x 2, con, c-frame} \explain{We split up our statement so we can perform deq() and whosNext(). Note here we've rewritten our queue sequence $s$ as $ys$, where $y = s_1 \land s = s_{2..}$. And by $s_1$ I mean the first element in the sequence s. This can be achieved as $|s| \neq 0$. We also remove q from the frame so that we can refine to whosNext()} \\ \\
 $
 \null \quad \textbf{con } y \cdot \textbf{var } e : V_t \cdot \\
-\null \quad v, f, q, e : \left[ pre(1) \land q = (N, sy), pre(1) \land q = (N, sy) \land e = y \right] \\
+\null \quad v, f, e : \left[ pre(1) \land q = (N, sy), pre(1) \land q = (N, sy) \land e = y \right] \\
 \null \quad v, f, q, e : \left[ pre(1) \land q = (N, sy) \land e = y, pre(1) \land q = (N, s) \land e = y  \right] \\
 \null \quad v, f, q, e : \left[ pre(6) \land e = y, post(6) \right]
 $ \\ \\
@@ -490,7 +490,11 @@ We now replace boolean expressions involving our abstract queue with concrete on
 %
 Clearly, $[0,0)$ gives us no $i$ to describe the array, i.e. we have no elements on the LHS. As our sequence is empty, there are no $n \in \N$ such that $s_n$ is an element, therefore we have an empty sequence, so our coupling invariant is satisfied.\\
 
-Now we may replace \ab{isEmpty()} with \con{$m = n$}.
+\noindent
+Now we may replace \ab{isEmpty()} with \con{$m = n$}. \\ \\
+
+\noindent
+Next, we must show that whosNext() follows our coupling invariant: 
 
 \subsection{Step 5}
 
