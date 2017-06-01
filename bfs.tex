@@ -7,6 +7,7 @@
 \usepackage[usenames, dvipsnames]{color}
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{2111defs2,2111theorems}
+\usepackage{listings}
 
 % Algortihms package for pretty code formatting!
 \usepackage{algorithm2e}
@@ -33,6 +34,32 @@
 \newcommand{\leftcurlyBoy}{\{}
 \newcommand{\rightcurlyBoy}{\}}
 
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{DarkOrchid},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,	                   % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=C,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\color{red}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{red},     % string literal style
+  tabsize=4,	                   % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
 
 % This is just fun:
 \newcommand{\que}[1]{\langle #1 \rangle}
@@ -67,9 +94,9 @@ We can now define our 5 core abstract queue operations: \\ \\
 % Do we even need this? In Liam's example he just sets the queue to the empty queue.
 $q : [True, ~ q = ( N, s) \land |s| = 0] \refinedby initq(q)$ \\
 \textbf{Enq:} \\
-$q : [n <= N, ~ q = ( N, s) \land s = xs_0 \land |s| \neq 0] \refinedby enq(q, x)$ \\
+$q : [|s| < N, ~ q = ( N, s) \land s = xs_0 \land |s| \neq 0] \refinedby enq(q, x)$ \\
 \textbf{Deq:} \\
-$q : [n > 0 \land q = (N, xs), q = (N, s) \land s = s_0 ] \refinedby  deq(q)$ \\
+$q : [|xs| > 0 \land q = (N, sx), q = (N, s) \land s = s_0 ] \refinedby  deq(q)$ \\
 \textbf{WhosNext:} \\
 $q,x : [q = (N, sy), q = q_0 \land x = y] \refinedby x := whosNext(q)$ \\
 \textbf{isEmpty:} \\
@@ -332,7 +359,10 @@ Note that both $n$ and $m$ are bounded by the conditions $0 \leq n < N + 1$ and 
 Now we define our coupling invariant to relate our concrete and abstract implementations:
 %
  \[ \C : \Q \times V_t^* \times \N \times \N \to \mathbb{B} \]
- \[ \C((N, s), A, n, m) = \Big( \forall i : \N \in \Big[0..(n - m)(mod ~N + 1)\Big). ~A[(n + i)(mod ~N + 1)] = s_i\Big) \]
+\begin{align*}
+ \C((N, s), A, n, m) = &\Big( \forall i \in \Big[0..(n - m)(mod ~N + 1)\Big). ~A[(n + i)(mod ~N + 1)] = s_i\Big) \\
+ &\land |s| = (n-m)(mod N + 1) 
+\end{align*}
 %
 %
 \subsection{Step 3}
@@ -342,7 +372,7 @@ Now we augment our new assignments in order to re-establish the coupling invaria
 %
 \begin{algorithm}[H]
 \textbf{var} q : $\mathcal{Q};$ \\
-\ab{init(q)}; \\
+\ab{init(q)}; \textcolor{green}{\tabb (A)}\\ 
 \con{
 \textbf{var} A : $V_t^{N+1}$; 
 \textbf{var} n : $\N$;
@@ -351,7 +381,7 @@ Now we augment our new assignments in order to re-establish the coupling invaria
 \con {
 n := 0; m := 0;
 } \\
-\ab{enq(q,$r_t$)}; \\
+\ab{enq(q,$r_t$)}; \textcolor{green}{\tabb (B)}\\
 \con{A[n] := $r_t$; \\
 n := n + 1(mod N + 1);} \\
 f := $False$; \\
@@ -359,7 +389,7 @@ f := $False$; \\
 	\textbf{var} e : $V_t$; \\
 	\ab{e := whosNext(q)}; \\
 	\con{e := A[m];} \\
-	\ab{deq(q)}; \\
+	\ab{deq(q)}; \textcolor{green}{\tabb (C)}\\
 	\con{m := m + 1 (mod N + 1);} \\
 	\eIf {$\kappa_t$(e) = k} {
 		v := $\lambda_t$(e); \\
@@ -368,7 +398,7 @@ f := $False$; \\
 		\textbf{var} succ := $\Gamma_t$(e); \\
 		\While {succ $\neq \varnothing$ } {
 			\textbf{var} l :$\in$ succ; \\
-			\ab{enq(q, l)}; \\
+			\ab{enq(q, l)}; \textcolor{green}{\tabb (D)}\\
 			\con{
 			A[n] := l; n := n + 1(mod N + 1);
 			} \\
@@ -379,13 +409,116 @@ f := $False$; \\
 \end{algorithm}
 %
 %
+We now must prove that our coupling invariant holds after each operation and after our initialisation. We are obliged to prove \textcolor{green}{(A-D)}.\\ \\
 %
+\textcolor{green}{(A)}: \\
+We must refine: \\
+%
+$q, A, m, n : [True, q = (N,s) \land |s| = 0 \land \C(q,A,m,n)]$ \\ \\ 
+%
+\rc{seq, c-frame} \\
+$q : [True, q = (N,s) \land |s| = 0];$ \\
+$A, m, n : [ q = (N,s) \land |s| = 0, \C((N,s),A,m,n)]$ \\ \\
+\rc{initq} \\
+initq(q); \\
+$A, m, n : [ q = (N,s) \land |s| = 0, \C((N,s),A,m,n)]$ \\  \\
+\rc{s-post, ass x 2} \explain{Our coupling invariant allows for any arbtrary $m$ such that $m$ = $n$ to represent an empty queue. By using an s-post to add $m = 0$ into the post condition, we can initialise $m$ and follow up by setting $n$ to the same value.} \\
+initq(q); \\
+m := 0; n := 0; \\ \\
+%
+%
+\textcolor{green}{(B)}:
+We must refine the following for our initial enqueue: \\ 
+$q, A, m, n : [\C(q,A,m,n), \C(q,A,m,n) \land q = (N,s) \land s = xs_0 \land |s| \neq 0]$ \\ \\
+%
+%
+\rc{i-con, c-frame, seq} \\
+\textbf{con } S $\cdot$ $q : \left[
+\begin{array}{l}
+\C((N,S),A,m,n) \land s = S, \\
+s = xS \land |s| \neq 0 \land q = (N,s) \land \C((N,S),A,m,n)
+\end{array}
+\right];$ \\
+%
+%
+\tabb $~A, m, n : \left[
+\begin{array}{l}
+\C((N,S),A,m,n) \land  s = xS \land |s| \neq 0 \land q = (N,s), \\
+\C(q,A,m,n) 
+\end{array}
+\right]$ \\
+%
+%
+\rc{enq} \\
+\textbf{con } S $\cdot$ enq(q,x);\\
+\tabb $~A, m, n : \left[
+\begin{array}{l}
+\C((N,S),A,m,n) \land  s = xS \land |s| \neq 0 \land q = (N,s), \\
+\C(q,A,m,n) 
+\end{array}
+\right]$ \\ \\
+%
+%
+\rc{a-ass, ass} \explain{To re-establish our coupling invariant, we must update out array at position $n$ to match the corresponding element in the sequence (as described in the first conjunct) and then increment $n$ to ensure that $|s| = (n - m)(mod N + 1)$ (as described in the second conjunct).} \\
+\textbf{con } S $\cdot$ enq(q,x);\\
+A[n] := x; n := n + 1 \\ \\
+%
+%
+\textcolor{green}{(C)}: \\
+%
+$ q, A, m, n : [\C((N,sy),A,m,n) \land |sy| \geq 0, (\C((N,s),A,m,n)) \land s= s_0 ];$
+%
+\textcolor{green}{}
 %
 \subsection{Step 4}
 We now replace boolean expressions involving our abstract queue with concrete ones. We only have 1 expression involving our abstract queue, \ab{isEmpty()}, which we can show is equivalent to \con{$m = n$}. To show this, we bring in our coupling invariant with $|s|$ = 0:
-\[ \C((N, s), A, n, m) = \Big( \forall i : \N \in [0..0). ~A[(m + i)(mod ~N + 1)] = s_i\Big) \]
+\[ \C((N, s), A, n, m) = \Big( \forall i \in [0..0). ~A[(m + i)(mod ~N + 1)] = s_i\Big) \land 0 = 0 \]
 %
-Clearly, [0,0) gives us no $i$ such that \\
+Clearly, $[0,0)$ gives us no $i$ to describe the array, i.e. we have no elements on the LHS. As our sequence is empty, there are no $n \in \N$ such that $s_n$ is an element, therefore we have an empty sequence, so our coupling invariant is satisfied.\\
 
+Now we may replace \ab{isEmpty()} with \con{$m = n$}.
+
+\subsection{Step 5}
+
+Our program is now independant of our abstract queue, and we can remove auxillary queue references. We now arrive at our concrete implementation:
+
+
+\begin{algorithm}[H]
+\con{
+\textbf{var} A : $V_t^{N+1}$; 
+\textbf{var} n : $\N$;
+\textbf{var} m : $\N$;
+} \\
+\con {
+n := 0; m := 0;
+} \\
+\con{A[n] := $r_t$; \\
+n := n + 1(mod N + 1);} \\
+f := $False$; \\
+\While {$\neg( f \lor \con{m = n})$} {
+	\textbf{var} e : $V_t$; \\
+	\con{e := A[m];} \\
+	\con{m := m + 1 (mod N + 1);} \\
+	\eIf {$\kappa_t$(e) = k} {
+		v := $\lambda_t$(e); \\
+		f := $True$ \\
+	} {
+		\textbf{var} succ := $\Gamma_t$(e); \\
+		\While {succ $\neq \varnothing$ } {
+			\textbf{var} l :$\in$ succ; \\
+			\con{
+			A[n] := l; n := n + 1(mod N + 1);
+			} \\
+			succ := succ $\setminus \{l\}$ \\
+		}
+	}
+}
+\end{algorithm}
+
+Yea the implementation! \\
+
+\section{C code}
+
+\lstinputlisting{bfs.c}
 
 \end{document}
