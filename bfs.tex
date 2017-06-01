@@ -38,7 +38,7 @@
 \newcommand{\que}[1]{\langle #1 \rangle}
 \newcommand{\explain}[1]{\textcolor{RoyalBlue}{\textit{#1}}}
 \newcommand{\ab}[1]{\textcolor{WildStrawberry}{#1}}
-\newcommand{\concrete}[1]{\textcolor{Aquamarine}{#1}}
+\newcommand{\con}[1]{\textcolor{RoyalBlue}{#1}}
 \newcommand{\tabb}{\null \quad}
 \newcommand{\tabbb}{\null \quad \quad}
 \newcommand{\tabbbb}{\null \quad \quad \quad}
@@ -289,7 +289,7 @@ Now, collecting our code we come to our BFS implementation using an abstract que
 \ab{init(q)}; \\
 \ab{enq(q,$r_t$)}; \\
 f := $False$; \\
-\While {$\neg( f \lor isEmpty(q))$} {
+\While {$\neg( f \lor \ab{isEmpty(q)})$} {
 	\textbf{var} e : $V_t$; \\
 	\ab{e := whosNext(q)}; \\
 	\ab{deq(q)}; \\
@@ -331,12 +331,61 @@ Note that both $n$ and $m$ are bounded by the conditions $0 \leq n < N + 1$ and 
 %
 Now we define our coupling invariant to relate our concrete and abstract implementations:
 %
- \[\C : \Q \times V_t^* \times \N \times \N \to \mathbb{B} \]
- \[\C((N, s), A, n, m) = \Big( \forall i \in [0..|s|]. ~A[(m + i)(mod ~N + 1)] = s_i\Big)\]
+ \[ \C : \Q \times V_t^* \times \N \times \N \to \mathbb{B} \]
+ \[ \C((N, s), A, n, m) = \Big( \forall i : \N \in \Big[0..(n - m)(mod ~N + 1)\Big). ~A[(n + i)(mod ~N + 1)] = s_i\Big) \]
 %
 %
 \subsection{Step 3}
 %
-Step 3 comes later yo
+Now we augment our new assignments in order to re-establish the coupling invariant $\C$: \\
 %
+%
+\begin{algorithm}[H]
+\textbf{var} q : $\mathcal{Q};$ \\
+\ab{init(q)}; \\
+\con{
+\textbf{var} A : $V_t^{N+1}$; 
+\textbf{var} n : $\N$;
+\textbf{var} m : $\N$;
+} \\
+\con {
+n := 0; m := 0;
+} \\
+\ab{enq(q,$r_t$)}; \\
+\con{A[n] := $r_t$; \\
+n := n + 1(mod N + 1);} \\
+f := $False$; \\
+\While {$\neg( f \lor \ab{isEmpty(q)})$} {
+	\textbf{var} e : $V_t$; \\
+	\ab{e := whosNext(q)}; \\
+	\con{e := A[m];} \\
+	\ab{deq(q)}; \\
+	\con{m := m + 1 (mod N + 1);} \\
+	\eIf {$\kappa_t$(e) = k} {
+		v := $\lambda_t$(e); \\
+		f := $True$ \\
+	} {
+		\textbf{var} succ := $\Gamma_t$(e); \\
+		\While {succ $\neq \varnothing$ } {
+			\textbf{var} l :$\in$ succ; \\
+			\ab{enq(q, l)}; \\
+			\con{
+			A[n] := l; n := n + 1(mod N + 1);
+			} \\
+			succ := succ $\setminus \{l\}$ \\
+		}
+	}
+}
+\end{algorithm}
+%
+%
+%
+%
+\subsection{Step 4}
+We now replace boolean expressions involving our abstract queue with concrete ones. We only have 1 expression involving our abstract queue, \ab{isEmpty()}, which we can show is equivalent to \con{$m = n$}. To show this, we bring in our coupling invariant with $|s|$ = 0:
+\[ \C((N, s), A, n, m) = \Big( \forall i : \N \in [0..0). ~A[(m + i)(mod ~N + 1)] = s_i\Big) \]
+%
+Clearly, [0,0) gives us no $i$ such that \\
+
+
 \end{document}
