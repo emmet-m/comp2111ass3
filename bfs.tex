@@ -96,7 +96,7 @@ $q : [True, ~ q = ( N, s) \land |s| = 0] \refinedby initq(q)$ \\
 \textbf{Enq:} \\
 $q : [|s| < N, ~ q = ( N, s) \land s = xs_0 \land |s| \neq 0] \refinedby enq(q, x)$ \\
 \textbf{Deq:} \\
-$q : [|xs| > 0 \land q = (N, sx), q = (N, s) \land s = s_0 ] \refinedby  deq(q)$ \\
+$q : [|sx| > 0 \land q = (N, sx), q = (N, s) \land s = s_0 ] \refinedby  deq(q)$ \\
 \textbf{WhosNext:} \\
 $q,x : [q = (N, sy), q = q_0 \land x = y] \refinedby x := whosNext(q)$ \\
 \textbf{isEmpty:} \\
@@ -411,7 +411,7 @@ f := $False$; \\
 %
 We now must prove that our coupling invariant holds after each operation and after our initialisation. We are obliged to prove \textcolor{green}{(A-D)}.\\ \\
 %
-\textcolor{green}{(A)}: \\
+\textcolor{green}{(A)}
 We must refine: \\
 %
 $q, A, m, n : [True, q = (N,s) \land |s| = 0 \land \C(q,A,m,n)]$ \\ \\ 
@@ -427,7 +427,7 @@ initq(q); \\
 m := 0; n := 0; \\ \\
 %
 %
-\textcolor{green}{(B)}:
+\textcolor{green}{(B)}
 We must refine the following for our initial enqueue: \\ 
 $q, A, m, n : [\C(q,A,m,n), \C(q,A,m,n) \land q = (N,s) \land s = xs_0 \land |s| \neq 0]$ \\ \\
 %
@@ -459,16 +459,30 @@ s = xS \land |s| \neq 0 \land q = (N,s) \land \C((N,S),A,m,n)
 \right]$ \\ \\
 %
 %
-\rc{a-ass, ass} \explain{To re-establish our coupling invariant, we must update out array at position $n$ to match the corresponding element in the sequence (as described in the first conjunct) and then increment $n$ to ensure that $|s| = (n - m)(mod N + 1)$ (as described in the second conjunct).} \\
+\rc{a-ass, ass} \explain{To re-establish our coupling invariant, we must update out array at position $n$ to match the corresponding element in the sequence (as described in the first conjunct) and then increment $n$ to $n + 1 (mod~N+1)$ to ensure that $|s| = (n - m)(mod N + 1)$ (as described in the second conjunct).} \\
 \textbf{con } S $\cdot$ enq(q,x);\\
-A[n] := x; n := n + 1 \\ \\
+A[n] := x; n := n + 1 (mod N+1) \\ \\
 %
 %
-\textcolor{green}{(C)}: \\
+\textcolor{green}{(C)}
+We must now refine our deq() in the loop: \\ \\
 %
-$ q, A, m, n : [\C((N,sy),A,m,n) \land |sy| \geq 0, (\C((N,s),A,m,n)) \land s= s_0 ];$
+$ q, A, m, n : [\C((N,sy),A,m,n) \land |sy| \geq 0 \land q = (N,sy), \C((N,s),A,m,n)) \land s= s_0 ];$ \\  \\
 %
-\textcolor{green}{}
+\rc{seq, c-frame, i-con} \explain{Removing everything but our dequeue counter from the frame}\\
+\textbf{con} S $\cdot$
+$ q : [\C((N,sy),A,m,n) \land |sy| \geq 0 \land q = (N, sy) \land S = s, (\C((N,Sy),A,m,n)) \land q = (N,S) ];$ \\
+$ m : [\C((N,Sy),A,m,n) \land |sy| \geq 0, \C((N,S),A,m,n)) ];$ \\ \\ \\
+%
+\rc{deq} \\
+deq(q); \\
+$ m : [\C((N,Sy),A,m,n) \land |sy| \geq 0, \C((N,S),A,m,n)) ];$ \\ \\
+%
+\rc{ass} \explain{To re-establish our coupling invariant in the post condition, we must match the new sequence established in the abstract stack. To accomplish this, we increment $m$ to $m (mod N+1)$ such that $n-m = |s|$} \\
+deq(q); \\
+m := m + 1 (mod N + 1); \\ \\
+%
+\textcolor{green}{(D)} Finally, the proof of the final enque follows that of \textcolor{green}{(B)}.
 %
 \subsection{Step 4}
 We now replace boolean expressions involving our abstract queue with concrete ones. We only have 1 expression involving our abstract queue, \ab{isEmpty()}, which we can show is equivalent to \con{$m = n$}. To show this, we bring in our coupling invariant with $|s|$ = 0:
