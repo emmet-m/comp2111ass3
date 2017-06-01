@@ -49,24 +49,26 @@ We will begin by defining some abstract queue operations in our toy language: \\
 {\LARGE{\textsc{Queue:}}\normalsize}
 \end{center}
 \begin{equation*}
-\mathcal{Q} :: ( N:\N, ~n:\N, ~s:V_{t}^{*} ) \\
+\mathcal{Q} :: ( N:\N, ~s:V_{t}^{*} ) \\
 \end{equation*} \\
 %
 Where $N$ is the max size of the queue, $n$ is the current size, and $s$ is a sequence of queue values. \\
 %
-We can now define our 4 core abstract queue operations: \\ \\
+We introduce the notation of $\llcorner s \lrcorner$, meaning to treat the sequence $s$ as a set such that all the values of s are in the $\llcorner s \lrcorner$. For convenience, we define $|s|$ as equivalent to $|\llcorner s \lrcorner|$.\\
+%
+We can now define our 5 core abstract queue operations: \\ \\
 %
 \textbf{Initq:} \\
 % Do we even need this? In Liam's example he just sets the queue to the empty queue.
-$q : [True, ~ q = ( N, n, s) \land n = 0] \refinedby initq(q)$ \\
+$q : [True, ~ q = ( N, s) \land |s| = 0] \refinedby initq(q)$ \\
 \textbf{Enq:} \\
-$q : [n <= N, ~ q = ( N, n, xs_0) \land n \neq 0] \refinedby enq(q, x)$ \\
+$q : [n <= N, ~ q = ( N, xs_0) \land |s| \neq 0] \refinedby enq(q, x)$ \\
 \textbf{Deq:} \\
-$q,x : [n > 0, q = (N, n, s_0) \land x = s[n] \land n = n_0 - 1] \refinedby x := deq(q)$ \\
+$q : [n > 0 \land q = (N, xs), q = (N, s_0) ] \refinedby  deq(q)$ \\
 \textbf{WhosNext:} \\
-$q,x : [q = (N, ys), q = q_0 \land x = y] \refinedby x := whosNext(q)$ \\
+$q,x : [q = (N, sy), q = q_0 \land x = y] \refinedby x := whosNext(q)$ \\
 \textbf{isEmpty:} \\
-$b : [q = (N, n, s), b \iff n = 0 ] \refinedby b := isEmpty(q)$\\
+$b : [q = (N, s), b \iff |s| = 0 ] \refinedby b := isEmpty(q)$\\
 %
 \subsection{Refinement}
 We begin by refining the provided specification of \textsc{Search}: \\ \\
@@ -103,11 +105,11 @@ post(1)~
 % SEQ
 \rc{seq} \explain{so we can refine to initq}\\
 $ \null \quad v, f, q : \left[ 
-	~ True, ~
-	pre(1) \land q = (N,n,s) \land n = 0
+	~ pre(1), ~
+	pre(1) \land q = (N,s) \land |s| = 0
 \right]$; \\
 $ \null \quad v, f, q : \left[ 	
-	pre(1) \land q = (N,n,s) \land n = 0, ~
+	pre(1) \land q = (N,s) \land |s| = 0, ~
 	post(1)
 \right]$ \\ \\
 %
@@ -115,30 +117,34 @@ $ \null \quad v, f, q : \left[
 \rc{initq} \explain{}\\
 $ \null \quad initq(q);$ \\
 $ \null \quad \nt{v, f, q : \left[ 	
-	pre(1) \land q = (N,n,s) \land n = 0, ~
+	pre(1) \land q = (N,s) \land |s| = 0, ~
 	post(1)
 \right]}{(2)}$ \\ \\
 %
 %
 Similarly, we push our initial element $r_t$ onto the queue: \\
 %
-(2) \rc{seq, con} \explain{We introduce a constant to freeze the value of $n$} \\
-$ \null \quad \textbf{con } m \cdot v, f, q : \left[ 	
+(2) \rc{seq} \explain{We introduce a constant to freeze the value of $n$} \\
+$ \null \quad v, f, q : \left[ 	
 \begin{array}{l}
-	pre(1) \land q = (N,n,s) \land n = 0 \land m = n,  \\
-	pre(1) \land q = (N,n,r_t) \land n \neq 0 \land n = m + 1
+	pre(1) \land q = (N,s) \land |s| = 0,  \\
+	pre(1) \land q = (N,xs) \land |s| \neq 0 \land x = r_t
 \end{array}
 \right]$; \\
-$ \null \quad \quad \quad  \quad \quad v, f, q : \left[ 	
-	~pre(1) \land q = (N,n,r_t) \land n \neq 0 \land n = m + 1, ~
+$ \tabb v, f, q : \left[ 	
+\begin{array}{l}
+	pre(1) \land q = (N,xs) \land |s| \neq 0 \land x = r_t, \\
 	post(1)
+\end{array}
 \right]$ \\ \\
 %
 \rc{enq} \\
 $ \null \quad enq(q, r_t)$; \\
 $ \null \quad \nt{v, f, q : \left[ 	
-	~pre(1) \land q = (N,n,r_t) \land n \neq 0 \land n = m + 1, ~
+\begin{array}{l}
+	pre(1) \land q = (N,xs) \land |s| \neq 0  \land x = r_t, \\
 	post(1)
+\end{array}
 \right]}{(3)}$ \\ \\
 %
 Now we set our result flag $f$ to false so we can begin our traversal: \\ \\
@@ -146,28 +152,32 @@ Now we set our result flag $f$ to false so we can begin our traversal: \\ \\
 (3) \rc{seq, ass} \explain{} \\
 $ \null \quad f := False;$ \\
 $ \null \quad \nt{v, f, q : \left[ 	
-	pre(1) \land q = (N,n,s) \land n \neq 0 \land f = False \land n = m + 1, ~
+\begin{array}{l}
+	pre(1) \land q = (N,xs) \land |s| \neq 0 \land x = r_t \land f = False, \\
 	post(1)
+\end{array}
 \right]}{(4)}$ \\ \\
 %
 Now we conquer the more difficult task of refining our loop. We begin with a sequential composition: \\
 %
-(4) \rc{w-pre} \explain{Remove our constant m from our precondition with a w-pre} \\
+(4) \rc{w-pre} \explain{Remove auxillary statements from our precondition with a w-pre} \\
 $ \null \quad \nt{v, f, q : \left[ 	
-	pre(1) \land q = (N,n,s) \land n \neq 0 \land f = False, ~
-	post(1) ~
+\begin{array}{l}
+	pre(1) \land q = (N,xs) \land |s| \neq 0 \land f = False, \\
+	post(1)
+\end{array}
 \right]}{(5)}$ \\
 %
 And now we refine (5) into our main loop: \\
 %
-
+%
 (5) \rc{while, isEmpty}  \\
 \begin{algorithm}[H]
 \While {$\neg (f \lor isEmpty(q))$} {
 	$v, f, q : \nt{\left[
 	\begin{array}{l}
-		pre(1) \land q = (N,n,s) \land \neg f \land n \neq 0, \\
-		pre(1) \land q = (N,n,s)
+		pre(1) \land q = (N,xs) \land \neg f \land |s| \neq 0, \\
+		pre(1) \land q = (N,s)
 	\end{array}
 	\right]}{(6)}$
 } 
@@ -182,15 +192,23 @@ Inv : \left(
 			  \land ~ \forall z \in \Gamma^{i}_t(r). e \in \Gamma(z) \implies z \notin s \land \kappa_t(z) \notin k \Big) \\
 			  \lor ~ ( \exists w \in V_t. ~w \in \Gamma_t^*(r_t) \land \kappa_t(w) = k \land \lambda_t(w) = v)
 		\end{array} \right)
-\end{equation*} \\
+\end{equation*} \\ 
 There are a few cases of the state of the queue that were unnecessary to consider due to the definition of a tree.
-We are able to represent the queue's set directly as the descendants of the current node being explored as it is a precondition that all nodes have a unique parent, implying that no node can be added multiple times. This is cemented by the lack of cycles in the tree. \\ \\
-Now we make the first step of getting a node to search over via \textsc{Deq}: \\ \\
-(6) \rc{i-loc, seq, deq} \explain{As we have n $\neq$ 0 in the precondition of (6) we can refine into deq() using a sequential composition} \\ \\
+We are able to represent the queue's set directly as the elements in the same level as the current node and the descendants of the current node being explored as it is a precondition that all nodes have a unique parent, implying that no node can be added multiple times. This is cemented by the lack of cycles in the tree. \\ \\
+(6) \rc{i-loc, seq x 2} \explain{We split up our statement so we can perform deq() and whosNext()} \\ \\
 $
 \null \quad \textbf{var } t \cdot 
-t := deq(q); \\
-\null \quad \nt{v, f, q, t : \left[ pre(6) \land t = s[n], post(6) \right]}{(7)}
+\null \quad v, f, q, t : \left[ pre(1) \land q = (N, sy), pre(1) \land q = (N, sy) \land t = y \right] \\
+\null \quad v, f, q, t : \left[ pre(1) \land q = (N, sy) \land t = y, pre(1) \land q = (N, s) \land t = y \land n = n_0 - 1 \right] \\ %TODO
+\null \quad v, f, q, t : \left[ pre(6) \land t = s_n, post(6) \right]
+$ \\ \\
+Now we make the first step of getting a node to search over via \textsc{Deq}: \\ \\
+(6) \rc{deq, whosNext} \explain{As we have n $\neq$ 0 in the precondition of (6) we can get the first element with whosNext() and remove it from the queue with deq()} \\ \\
+$
+\null \quad \textbf{var } t \cdot 
+t := whosNext(q); \\
+\tabb deq(q); \\ 
+\null \quad \nt{v, f, q, t : \left[ pre(6) \land t = s_n, post(6) \right]}{(7)}
 $ \\ \\
 We now need a conditional to check if our current node $t$ is our goal. \\ \\
 %
@@ -200,9 +218,9 @@ We now need a conditional to check if our current node $t$ is our goal. \\ \\
 (7) \rc{if} \explain{} \\
 \begin{algorithm}[H]
 \eIf { $\kappa_t(t) = k$ } {
-$\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_t(t) = k, post(6) \right]}{(8)}$
+$\nt{v, f, q, t : \left[ pre(6) \land t = s_n \land \kappa_t(t) = k, post(6) \right]}{(8)}$
 } {
-$\nt{v, f, q, t : \left[ pre(6) \land t = s[n] \land \kappa_t(t) \neq k, post(6) \right]}{(9)}$
+$\nt{v, f, q, t : \left[ pre(6) \land t = s_n \land \kappa_t(t) \neq k, post(6) \right]}{(9)}$
 }
 \end{algorithm}
 %
