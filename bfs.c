@@ -9,20 +9,22 @@
  * v is a pointer to the found node with key k
  */
 void search (Tree root, unsigned int N, Key key, T *val, RetVal *found) {
-	Queue q;
-	initq(N, q);
-    enqueue(q,root);
+	Tree A[N+1]; int n; int m;
+	n = 0; m = 0;
+	A[n] = root;
+	n = (n + 1) % N + 1;
 	found = Failure;
-	while (! (isEmpty(q) || found)) {
-		Tree n = dequeue(q);
-		if (cmpKey(key, n->id)) {
-			*val = n->val;
+	while (! (found || m == n)) {
+		Tree e = A[m];
+		m = (m + 1) % N + 1;
+		if (cmpKey(key, e->id)) {
+			*val = e->val;
 			*found = Success;
 		} else {
-			List curr = n->list;
-			while (curr != null) {
-				enq(q,curr->n);
-				curr = curr->next;
+			List succ = e->list;
+			while (succ != NULL) {
+				A[n] = succ->n; n = (n + 1) % N + 1;
+				succ = succ->next;
 			}
 		}
 	}
