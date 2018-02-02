@@ -17,5 +17,5 @@ bfs.pdf: bfs.tex
 
 clean:
 	$(RM) $(OFILES) $(TARGETS)
-	latexmk -C bfs
+	$(RM) bfs.aux bfs.fdb_latexmk bfs.fls bfs.log bfs.out
 
